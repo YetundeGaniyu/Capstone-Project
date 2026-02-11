@@ -1,0 +1,56 @@
+import { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
+import { useAuth } from '../context/AuthContext'
+
+export function Login() {
+  const { signInWithGoogle, currentUser } = useAuth()
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState('')
+  const navigate = useNavigate()
+
+  // Redirect if already logged in
+  if (currentUser) {
+    navigate('/dashboard')
+    return null
+  }
+
+  const handleGoogleSignIn = async () => {
+    setLoading(true)
+    setError('')
+    try {
+      await signInWithGoogle()
+      // Navigation will be handled by ProtectedRoute checking for role
+      navigate('/role-selection')
+    } catch (err) {
+      setError('Failed to sign in. Please try again.')
+      console.error(err)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  return (
+    <section className="page page-login">
+      <div className="page-width">
+        <div className="card auth-card">
+          <h1 className="page-title">Sign in to SMEsConnect</h1>
+          <p className="page-subtitle">
+            Sign-in with Google to get started.
+          </p>
+
+          {error && <div className="error-message">{error}</div>}
+
+          <button
+            type="button"
+            onClick={handleGoogleSignIn}
+            disabled={loading}
+            className="btn btn-primary btn-block"
+          >
+            {loading ? 'Signing in...' : 'Continue with Google'}
+          </button>
+        </div>
+      </div>
+    </section>
+  )
+}
+
