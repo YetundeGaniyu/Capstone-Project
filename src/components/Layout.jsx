@@ -1,5 +1,6 @@
 import { Link, NavLink } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
+import { AIChatBox } from './AIChatBox.jsx'
 
 export function Layout({ children }) {
   const { currentUser, logout, userRole } = useAuth()
@@ -20,12 +21,15 @@ export function Layout({ children }) {
         <div className="header-inner">
           <Link to="/" className="brand">
             <span className="brand-mark"></span>
-            <span className="brand-text">SMEsConnect</span>
+            <span className="brand-text">Ask Yellow</span>
           </Link>
 
           <nav className="nav">
             <NavLink to="/" className="nav-link">
               Home
+            </NavLink>
+            <NavLink to="/vendors" className="nav-link">
+              Vendors
             </NavLink>
             {currentUser && userRole && (
               <NavLink to="/dashboard" className="nav-link">
@@ -33,9 +37,14 @@ export function Layout({ children }) {
               </NavLink>
             )}
             {isVendor && (
-              <NavLink to="/vendor/profile" className="nav-link">
-                Vendor profile
-              </NavLink>
+              <>
+                <NavLink to="/vendor/onboarding" className="nav-link">
+                  Set up profile
+                </NavLink>
+                <NavLink to="/vendor/profile" className="nav-link">
+                  Vendor profile
+                </NavLink>
+              </>
             )}
             {currentUser ? (
               <button onClick={handleLogout} className="btn btn-ghost btn-sm">
@@ -52,10 +61,12 @@ export function Layout({ children }) {
 
       <main className="app-main">{children}</main>
 
+      <AIChatBox />
+
       <footer className="app-footer">
         <div className="footer-inner">
           <p className="footer-text">
-            © {new Date().getFullYear()} SMEsConnect. Connecting SMEs with customers.
+            © {new Date().getFullYear()} Ask Yellow... Connecting SMEs with customers
           </p>
         </div>
       </footer>

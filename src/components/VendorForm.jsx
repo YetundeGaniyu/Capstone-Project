@@ -1,4 +1,5 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+import { useLocation } from 'react-router-dom'
 import { doc, setDoc } from 'firebase/firestore'
 import { db } from '../services/firebase'
 import { useAuth } from '../context/AuthContext'
@@ -14,6 +15,9 @@ const CATEGORIES = [
 
 export function VendorForm() {
   const { currentUser } = useAuth()
+  const location = useLocation()
+  const prefilled = location.state?.prefilled
+
   const [formValues, setFormValues] = useState({
     businessName: '',
     category: '',
@@ -21,10 +25,28 @@ export function VendorForm() {
     phone: '',
     whatsapp: '',
     address: '',
+    latitude: '',
+    longitude: '',
   })
   const [errors, setErrors] = useState({})
   const [saving, setSaving] = useState(false)
   const [savedMessage, setSavedMessage] = useState('')
+
+  useEffect(() => {
+    if (prefilled && typeof prefilled === 'object') {
+      setFormValues((prev) => ({
+        ...prev,
+        businessName: prefilled.businessName ?? prev.businessName,
+        category: prefilled.category ?? prev.category,
+        description: prefilled.description ?? prev.description,
+        phone: prefilled.phone ?? prev.phone,
+        whatsapp: prefilled.whatsapp ?? prev.whatsapp,
+        address: prefilled.address ?? prev.address,
+        latitude: prefilled.latitude ?? prev.latitude,
+        longitude: prefilled.longitude ?? prev.longitude,
+      }))
+    }
+  }, [prefilled])
 
   if (!currentUser) {
     // Safety guard; route should already be protected
@@ -64,9 +86,9 @@ export function VendorForm() {
 
     try {
       const vendorRef = doc(db, 'vendors', currentUser.uid)
-      await setDoc(
-        vendorRef,
-        {
+      const lat = Number(formValues.latitude)
+        const lng = Number(formValues.longitude)
+        const payload = {
           userId: currentUser.uid,
           businessName: formValues.businessName.trim(),
           category: formValues.category,
@@ -75,9 +97,12 @@ export function VendorForm() {
           whatsapp: formValues.whatsapp.trim(),
           address: formValues.address.trim(),
           updatedAt: new Date().toISOString(),
-        },
-        { merge: true },
-      )
+        }
+        if (!Number.isNaN(lat) && !Number.isNaN(lng)) {
+          payload.latitude = lat
+          payload.longitude = lng
+        }
+        await setDoc(vendorRef, payload, { merge: true })
 
       setSavedMessage('Your vendor profile has been saved.')
     } catch (error) {
@@ -179,6 +204,33 @@ export function VendorForm() {
               />
               {errors.address && <span className="field-error">{errors.address}</span>}
             </label>
+
+            <div className="field-row">
+              <label className="field">
+                <span className="field-label">Latitude (optional)</span>
+                <input
+                  className="field-input"
+                  name="latitude"
+                  type="number"
+                  step="any"
+                  value={formValues.latitude}
+                  onChange={handleChange}
+                  placeholder="6.5244"
+                />
+              </label>
+              <label className="field">
+                <span className="field-label">Longitude (optional)</span>
+                <input
+                  className="field-input"
+                  name="longitude"
+                  type="number"
+                  step="any"
+                  value={formValues.longitude}
+                  onChange={handleChange}
+                  placeholder="3.3792"
+                />
+              </label>
+            </div>
 
             <button type="submit" className="btn btn-primary btn-block" disabled={saving}>
               {saving ? 'Saving profile...' : 'Save profile'}

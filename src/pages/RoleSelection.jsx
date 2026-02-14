@@ -30,7 +30,7 @@ export function RoleSelection() {
         <div className="card auth-card">
           <h1 className="page-title">Choose your role</h1>
           <p className="page-subtitle">
-            Select how you would like to use SMEsConnect.
+            Select how you&apos;d like to use ArtisanConnect.
           </p>
 
           <form className="form" onSubmit={handleSubmit}>
@@ -47,7 +47,7 @@ export function RoleSelection() {
                 <div className="role-card">
                   <h3 className="role-title">SME Owner / User</h3>
                   <p className="role-description">
-                    Find and connect with service providers for reliable and efficient services.
+                    Find and connect with artisans for your business needs
                   </p>
                 </div>
               </label>
@@ -62,9 +62,9 @@ export function RoleSelection() {
                   className="role-radio"
                 />
                 <div className="role-card">
-                  <h3 className="role-title">Service Provider / User</h3>
+                  <h3 className="role-title">Vendor / Artisan</h3>
                   <p className="role-description">
-                    Showcase your services and connect with customers who require your services
+                    Showcase your services and connect with SMEs
                   </p>
                 </div>
               </label>

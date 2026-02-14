@@ -8,6 +8,8 @@ import { RoleSelection } from './pages/RoleSelection.jsx'
 import { Layout } from './components/Layout.jsx'
 import { ProtectedRoute } from './components/ProtectedRoute.jsx'
 import { VendorForm } from './components/VendorForm.jsx'
+import { VendorList } from './components/VendorList.jsx'
+import { VendorOnboarding } from './pages/VendorOnboarding.jsx'
 import './styles/global.css'
 
 function App() {
@@ -28,6 +30,14 @@ function App() {
               }
             />
             <Route
+              path="/vendor/onboarding"
+              element={
+                <ProtectedRoute requireRole="vendor">
+                  <VendorOnboarding />
+                </ProtectedRoute>
+              }
+            />
+            <Route
               path="/vendor/profile"
               element={
                 <ProtectedRoute requireRole="vendor">
@@ -35,6 +45,7 @@ function App() {
                 </ProtectedRoute>
               }
             />
+            <Route path="/vendors" element={<VendorList />} />
             <Route path="/vendors/:id" element={<VendorProfile />} />
           </Routes>
         </Layout>
