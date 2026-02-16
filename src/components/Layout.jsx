@@ -51,9 +51,14 @@ export function Layout({ children }) {
                 Logout
               </button>
             ) : (
-              <NavLink to="/login" className="nav-link nav-cta">
-                Login
-              </NavLink>
+              <>
+                <NavLink to="/login" className="nav-link nav-cta">
+                  Login
+                </NavLink>
+                <NavLink to="/admin/access" className="nav-link nav-admin">
+                  Admin
+                </NavLink>
+              </>
             )}
           </nav>
         </div>

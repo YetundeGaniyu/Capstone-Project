@@ -32,45 +32,215 @@
   box-sizing: border-box;
 }
 
-/* body {
+body {
   margin: 0;
   min-height: 100vh;
   font-family: var(--font-base);
   background-attachment: fixed;
   color: var(--color-text);
   -webkit-font-smoothing: antialiased;
-  background-image: url('../assets/team\ img.png');
-  background-size: cover;
-  background-position: center;
-  background-repeat: no-repeat; 
-  
-} */
-
-body {
-  margin: 0;
-  min-height: 100vh;
-  font-family: var(--font-base);
-  color: var(--color-text);
-  -webkit-font-smoothing: antialiased;
-
   position: relative;
-  background: none; /* remove direct image */
-}
+  background: none;
+} 
 
 /* Background layer */
 body::before {
   content: "";
   position: fixed;
   inset: 0;
-  background-image: url('../assets/team img.png');
+  background: var(--color-bg);
+  z-index: -1;
+  background-image: url('../assets/afro\ img.png');
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
-
   opacity: 0.5; /* <-- control image opacity here */
   z-index: -4;
 }
 
+.btn-admin {
+  background: linear-gradient(135deg, var(--color-warm) 0%, var(--color-coral) 100%);
+  color: #fff;
+  border: none;
+  padding: var(--space-sm) var(--space-lg);
+  border-radius: var(--radius-full);
+  font-weight: 600;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 12px rgba(190, 18, 60, 0.35);
+}
+
+.btn-admin:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(154, 124, 132, 0.45);
+}
+
+.btn-admin:active {
+  transform: translateY(0);
+}
+
+.nav-admin {
+  background: linear-gradient(135deg, var(--color-warm) 0%, var(--color-coral) 100%);
+  color: #fff !important;
+  border-radius: var(--radius-full);
+  padding: var(--space-xs) var(--space-sm);
+  font-weight: 600;
+  font-size: 0.85rem;
+  box-shadow: 0 2px 8px rgba(190, 18, 60, 0.25);
+  transition: all 0.2s ease;
+}
+
+.nav-admin:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(190, 18, 60, 0.35);
+}
+
+/* Admin Access Page */
+.page-admin-access {
+  padding: var(--space-xl) 0;
+}
+
+.admin-access-container {
+  max-width: 500px;
+  margin: 0 auto;
+}
+
+.admin-access-header {
+  text-align: center;
+  margin-bottom: var(--space-xl);
+}
+
+.admin-access-header .page-title {
+  margin: 0 0 var(--space-md) 0;
+  color: var(--color-text);
+  font-size: 2rem;
+  font-weight: 700;
+}
+
+.admin-access-header .page-subtitle {
+  margin: 0;
+  color: var(--color-text-muted);
+  font-size: 1.1rem;
+}
+
+.admin-access-form {
+  background: var(--color-surface);
+  padding: var(--space-xl);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-card);
+  border: 1px solid var(--color-border-subtle);
+}
+
+.admin-access-info {
+  margin-top: var(--space-lg);
+  text-align: center;
+}
+
+.admin-access-info small {
+  color: var(--color-text-muted);
+  font-size: 0.875rem;
+}
+
+.admin-access-links {
+  margin-top: var(--space-lg);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.admin-access-links .link {
+  color: var(--color-primary);
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.admin-access-links .link:hover {
+  text-decoration: underline;
+}
+
+.admin-test-section {
+  margin-top: var(--space-lg);
+  padding-top: var(--space-lg);
+  border-top: 1px solid var(--color-border-subtle);
+  text-align: center;
+}
+
+.btn-secondary {
+  background: var(--color-text-muted);
+  color: #fff;
+  border: none;
+  padding: var(--space-xs) var(--space-md);
+  border-radius: var(--radius-md);
+  font-weight: 500;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-secondary:hover {
+  background: var(--color-text);
+  transform: translateY(-1px);
+}
+
+/* Admin Gateway */
+.admin-gateway {
+  margin: var(--space-lg) 0;
+  padding: var(--space-lg);
+  background: var(--color-surface);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-card);
+  border: 1px solid var(--color-border-subtle);
+}
+
+.admin-gateway-content h2 {
+  margin: 0 0 var(--space-md) 0;
+  color: var(--color-text);
+  font-size: 1.5rem;
+  font-weight: 600;
+}
+
+.admin-gateway-content p {
+  margin: 0 0 var(--space-lg) 0;
+  color: var(--color-text-muted);
+}
+
+.admin-form {
+  margin-top: var(--space-md);
+}
+
+.admin-form .form-group {
+  margin-bottom: var(--space-md);
+}
+
+.admin-form .form-label {
+  display: block;
+  margin-bottom: var(--space-sm);
+  font-weight: 500;
+  color: var(--color-text);
+}
+
+.admin-form .form-input {
+  width: 100%;
+  padding: var(--space-sm);
+  border: 1px solid var(--color-border-subtle);
+  border-radius: var(--radius-md);
+  font-size: 1rem;
+}
+
+.admin-form .btn {
+  margin-top: var(--space-md);
+}
+
+.admin-info {
+  margin-top: var(--space-lg);
+  text-align: center;
+}
+
+.admin-info small {
+  color: var(--color-text-muted);
+  font-size: 0.875rem;
+}
 
 
 #root {
@@ -127,20 +297,19 @@ input {
 .brand-mark {
   width: 70px;
   height: 35px;
-  /* border-radius: 12px; */
-  /* background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-accent) 100%); */
-  /* color: #fff; */
-  /* font-weight: 600; */
+  border-radius: 12px;
+  background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-accent) 100%);
+  color: #fff;
+  font-weight: 600;
   display: flex;
   align-items: center;
   justify-content: center;
-  /* font-size: 0.8rem; */
-  /* box-shadow: 0 4px 12px rgba(99, 102, 241, 0.35); */
+  font-size: 0.8rem;
+  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.35);
   background-image: url(../assets/biz_img-removebg-preview.png);
-  background-size:contain;
+  background-size: contain;
   background-position: center;
   background-repeat: no-repeat;
-
 }
 
 .brand-text {

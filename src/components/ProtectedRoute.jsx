@@ -12,6 +12,24 @@ export function ProtectedRoute({ children, requireRole }) {
     )
   }
 
+  // Check admin session for admin routes
+  if (requireRole === 'admin') {
+    const session = localStorage.getItem('adminSession')
+    if (session) {
+      try {
+        const sessionData = JSON.parse(session)
+        // eslint-disable-next-line
+        const sessionAge = Date.now() - new Date(sessionData.timestamp).getTime()
+        if (sessionAge < 24 * 60 * 60 * 1000 && sessionData.loggedIn) {
+          return children
+        }
+      } catch (error) {
+        console.error('Error parsing admin session:', error)
+      }
+    }
+    return <Navigate to="/admin/access" replace />
+  }
+
   if (!currentUser) {
     return <Navigate to="/login" replace />
   }

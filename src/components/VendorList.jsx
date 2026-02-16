@@ -85,8 +85,10 @@ function filterVendors(vendors, category, keyword) {
 export function VendorList() {
   const [vendors, setVendors] = useState([])
   const [loading, setLoading] = useState(true)
+  const [searchLoading, setSearchLoading] = useState(false)
   const [category, setCategory] = useState('')
   const [keyword, setKeyword] = useState('')
+  const [searchTimeout, setSearchTimeout] = useState(null)
 
   useEffect(() => {
     let cancelled = false
@@ -111,6 +113,37 @@ export function VendorList() {
   const filtered = filterVendors(vendors, category, keyword)
   const ranked = rankVendors(filtered, keyword)
 
+  // Handle keyword change with debouncing
+  const handleKeywordChange = (newKeyword) => {
+    setKeyword(newKeyword)
+    
+    // Clear existing timeout
+    if (searchTimeout) {
+      clearTimeout(searchTimeout)
+    }
+
+    // Show loading state for search
+    if (newKeyword.trim()) {
+      setSearchLoading(true)
+    }
+
+    // Set new timeout for search
+    const timeout = setTimeout(() => {
+      setSearchLoading(false)
+    }, 500)
+
+    setSearchTimeout(timeout)
+  }
+
+  // Handle category change
+  const handleCategoryChange = (newCategory) => {
+    setCategory(newCategory)
+    if (newCategory) {
+      setSearchLoading(true)
+      setTimeout(() => setSearchLoading(false), 300)
+    }
+  }
+
   return (
     <section className="page page-vendor-list">
       <div className="page-width">
@@ -123,14 +156,18 @@ export function VendorList() {
 
         <FilterBar
           category={category}
-          onCategoryChange={setCategory}
+          onCategoryChange={handleCategoryChange}
           keyword={keyword}
-          onKeywordChange={setKeyword}
+          onKeywordChange={handleKeywordChange}
         />
 
         {loading ? (
           <div className="loading-container">
             <div className="loading-spinner">Loading vendors…</div>
+          </div>
+        ) : searchLoading ? (
+          <div className="loading-container">
+            <div className="loading-spinner">Loading vendors...</div>
           </div>
         ) : ranked.length === 0 ? (
           <div className="vendor-list-empty">

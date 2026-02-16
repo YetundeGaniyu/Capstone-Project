@@ -18,9 +18,8 @@ export function Login() {
     setLoading(true)
     setError('')
     try {
-      await signInWithGoogle()
-      // Navigation will be handled by ProtectedRoute checking for role
-      navigate('/role-selection')
+      await signInWithGoogle('user')
+      navigate('/dashboard')
     } catch (err) {
       setError('Failed to sign in. Please try again.')
       console.error(err)
@@ -33,9 +32,9 @@ export function Login() {
     <section className="page page-login">
       <div className="page-width">
         <div className="card auth-card">
-          <h1 className="page-title">Sign in to SMEsConnect</h1>
+          <h1 className="page-title">User Sign In</h1>
           <p className="page-subtitle">
-            Sign-in with Google to get started.
+            Sign in to find and connect with trusted service providers
           </p>
 
           {error && <div className="error-message">{error}</div>}
@@ -48,6 +47,16 @@ export function Login() {
           >
             {loading ? 'Signing in...' : 'Continue with Google'}
           </button>
+
+          <div className="auth-footer">
+            <p>New user?</p>
+            <a href="/signup/user" className="link">Create an account</a>
+          </div>
+          
+          <div className="auth-footer">
+            <p>Are you a vendor?</p>
+            <a href="/login/vendor" className="link">Sign in as vendor</a>
+          </div>
         </div>
       </div>
     </section>

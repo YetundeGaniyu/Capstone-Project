@@ -1,3 +1,6 @@
+import { AIChatBox } from '../components/AIChatBox'
+import { TopVendors } from '../components/TopVendors'
+
 export function Home() {
   return (
     <section className="page page-home">
@@ -10,10 +13,10 @@ export function Home() {
             Whether you're a plumber, electrician, or any other service provider, Ask Yellow can help you find the right customers for your business.
             </p>
             <div className="hero-actions">
-              <a href="/dashboard" className="btn btn-primary">
+              <a href="/vendors" className="btn btn-primary">
                 Explore dashboard
               </a>
-              <a href="/login" className="btn btn-ghost">
+              <a href="/login/vendor" className="btn btn-ghost">
                 Login as Vendor
               </a>
             </div>
@@ -42,7 +45,11 @@ export function Home() {
             </div>
           </div>
         </section>
+        
+        <TopVendors />
       </div>
+      
+      <AIChatBox />
     </section>
   )
 }
