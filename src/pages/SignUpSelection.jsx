@@ -30,7 +30,7 @@ export function SignUpSelection() {
               className="btn btn-outline btn-block signup-option-btn"
             >
               <div className="option-content">
-                <h3 className="option-title">Vendor / Artisan</h3>
+                <h3 className="option-title">Service Provider/ Artisan</h3>
                 <p className="option-description">
                   Showcase your services and connect with SMEs
                 </p>
