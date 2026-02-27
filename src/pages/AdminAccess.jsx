@@ -25,21 +25,28 @@ export function AdminAccess() {
     setError('')
 
     try {
-      // Admin credentials
+      // Admin credentials - trim input values to prevent whitespace issues
       const ADMIN_CREDENTIALS = {
         email: 'admin@smeconnect.com',
         password: 'Admin@2024!Secure',
         adminKey: 'ADMIN-2024-KEY'
       }
       
-      console.log('Expected credentials:', ADMIN_CREDENTIALS)
-      console.log('Email match:', credentials.email === ADMIN_CREDENTIALS.email)
-      console.log('Password match:', credentials.password === ADMIN_CREDENTIALS.password)
-      console.log('Admin key match:', credentials.adminKey === ADMIN_CREDENTIALS.adminKey)
+      const trimmedCredentials = {
+        email: credentials.email.trim(),
+        password: credentials.password.trim(),
+        adminKey: credentials.adminKey.trim()
+      }
       
-      if (credentials.email === ADMIN_CREDENTIALS.email && 
-          credentials.password === ADMIN_CREDENTIALS.password &&
-          credentials.adminKey === ADMIN_CREDENTIALS.adminKey) {
+      console.log('Expected credentials:', ADMIN_CREDENTIALS)
+      console.log('Submitted credentials:', trimmedCredentials)
+      console.log('Email match:', trimmedCredentials.email === ADMIN_CREDENTIALS.email)
+      console.log('Password match:', trimmedCredentials.password === ADMIN_CREDENTIALS.password)
+      console.log('Admin key match:', trimmedCredentials.adminKey === ADMIN_CREDENTIALS.adminKey)
+      
+      if (trimmedCredentials.email === ADMIN_CREDENTIALS.email && 
+          trimmedCredentials.password === ADMIN_CREDENTIALS.password &&
+          trimmedCredentials.adminKey === ADMIN_CREDENTIALS.adminKey) {
         
         console.log('Authentication successful!')
         
