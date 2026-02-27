@@ -18,9 +18,9 @@ export function SignUpSelection() {
               className="btn btn-outline btn-block signup-option-btn"
             >
               <div className="option-content">
-                <h3 className="option-title">SME Owner / User</h3>
+                <h3 className="option-title">Vendor / User</h3>
                 <p className="option-description">
-                  Find and connect with artisans for your business needs
+                  Find and connect with artisans for your needs
                 </p>
               </div>
             </button>
