@@ -51,7 +51,7 @@ export function VendorLogin() {
     <section className="page page-vendor-login">
       <div className="page-width">
         <div className="card auth-card">
-          <h1 className="page-title">Business Login</h1>
+          <h1 className="page-title">Login</h1>
           <p className="page-subtitle">
             Sign in to manage your business profile and connect with customers
           </p>
@@ -96,7 +96,7 @@ export function VendorLogin() {
               disabled={loading}
               className="btn btn-primary btn-block"
             >
-              {loading ? "Signing in..." : "Business Login"}
+              {loading ? "Signing in..." : "Login"}
             </button>
           </form>
 

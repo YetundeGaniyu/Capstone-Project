@@ -18,7 +18,7 @@ export function Home() {
             </p>
             <div className="hero-actions">
               <a href="/vendors" className="btn btn-primary">
-                Explore dashboard
+                Take a Tour
               </a>
               <a href="/login/vendor" className="btn btn-ghost">
                 Service Provider Login

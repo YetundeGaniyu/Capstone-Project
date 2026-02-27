@@ -14,7 +14,7 @@ export function VendorOnboarding() {
         <header className="onboarding-header">
           <h1 className="onboarding-title">Set up your business profile</h1>
           <p className="onboarding-subtitle">
-            Answer a few questions and we’ll prefill your profile for you.
+            Answer a few questions and we'll prefill your profile for you.
           </p>
         </header>
         <div className="onboarding-card">

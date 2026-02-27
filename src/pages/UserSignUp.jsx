@@ -33,10 +33,10 @@ export function UserSignUp() {
     <section className="page page-signup">
       <div className="page-width">
         <div className="card auth-card">
-          <h1 className="page-title">Sign up as SME Owner</h1>
+          <h1 className="page-title">Welcome to Ask Yello</h1>
           <p className="page-subtitle">
-            Connect with talented artisans and service providers for your
-            business needs
+            Connect with talented artisans and service providers for premium
+            services
           </p>
 
           {error && <div className="error-message">{error}</div>}

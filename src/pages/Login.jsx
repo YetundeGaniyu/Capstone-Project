@@ -50,7 +50,7 @@ export function Login() {
 
           <div className="auth-footer">
             <p>New user?</p>
-            <a href="/signup/user" className="link">Create an account</a>
+            <a href="/signup/user" className="link">Sign up</a>
           </div>
           
           <div className="auth-footer">

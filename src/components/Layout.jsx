@@ -21,7 +21,7 @@ export function Layout({ children }) {
         <div className="header-inner">
           <Link to="/" className="brand">
             <span className="brand-mark"></span>
-            <span className="brand-text">Ask Yellow</span>
+            <span className="brand-text">Ask Yello</span>
           </Link>
 
           <nav className="nav">
