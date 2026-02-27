@@ -50,6 +50,8 @@ export function UserSignUp() {
             {loading ? 'Signing up...' : 'Sign up with Google'}
           </button>
 
+          <div className="auth-divider"></div>
+
           <div className="auth-footer">
             <p>Already have an account?</p>
             <a href="/login" className="link">Sign in</a>

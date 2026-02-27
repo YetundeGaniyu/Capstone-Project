@@ -191,7 +191,7 @@ export function VendorLogin() {
               <button
                 type="submit"
                 disabled={loading}
-                className="btn btn-primary btn-block"
+                className="btn btn-vendor-login btn-block"
               >
                 {loading ? 'Signing in...' : 'Login'}
               </button>
@@ -223,7 +223,7 @@ export function VendorLogin() {
               <button
                 type="submit"
                 disabled={loading}
-                className="btn btn-primary btn-block"
+                className="btn btn-vendor-login btn-block"
               >
                 {loading ? 'Verifying...' : 'Verify OTP'}
               </button>

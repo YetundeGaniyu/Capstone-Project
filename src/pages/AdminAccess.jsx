@@ -11,10 +11,35 @@ export function AdminAccess() {
   const [error, setError] = useState('')
   const navigate = useNavigate()
 
+  // Check admin session
+  const checkAdminSession = () => {
+    const session = localStorage.getItem('adminSession')
+    if (session) {
+      try {
+        const sessionData = JSON.parse(session)
+        const sessionAge = Date.now() - new Date(sessionData.timestamp).getTime()
+        // Session expires after 24 hours
+        return sessionAge < 24 * 60 * 60 * 1000 && sessionData.loggedIn
+      } catch (error) {
+        console.error('Error parsing admin session:', error)
+        return false
+      }
+    }
+    return false
+  }
+
+  // Check if user is admin
+  const isAdmin = checkAdminSession()
+
   const handleSubmit = async (e) => {
     e.preventDefault()
     
     console.log('Admin login attempt:', credentials)
+    console.log('Form values:', {
+      email: credentials.email,
+      password: credentials.password,
+      adminKey: credentials.adminKey
+    })
     
     if (!credentials.email || !credentials.password || !credentials.adminKey) {
       setError('Please enter email, password, and admin key')
@@ -53,13 +78,23 @@ export function AdminAccess() {
         // Store admin session
         const sessionData = {
           loggedIn: true,
-          timestamp: new Date().toISOString()
+          timestamp: new Date().toISOString(),
+          email: trimmedCredentials.email
         }
+        
+        console.log('Storing session:', sessionData)
         localStorage.setItem('adminSession', JSON.stringify(sessionData))
         
-        console.log('Session stored:', sessionData)
+        // Verify session was stored
+        const storedSession = localStorage.getItem('adminSession')
+        console.log('Session verification:', storedSession)
         
-        navigate('/admin/dashboard')
+        // Small delay to ensure localStorage is set
+        setTimeout(() => {
+          console.log('Navigating to dashboard...')
+          navigate('/admin/dashboard')
+        }, 100)
+        
       } else {
         console.log('Authentication failed!')
         setError('Invalid admin credentials')

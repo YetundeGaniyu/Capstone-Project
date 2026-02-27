@@ -49,9 +49,11 @@ export function Login() {
             {loading ? 'Signing in...' : 'Continue with Google'}
           </button>
 
+          <div className="auth-divider"></div>
+
           <div className="auth-footer">
             <p>New user?</p>
-            <a href="/signup/user" className="link">Create an account</a>
+            <a href="/signup/user" className="link">Sign up</a>
           </div>
         </div>
       </div>
