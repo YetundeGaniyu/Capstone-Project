@@ -7,7 +7,6 @@ export default defineConfig({
     react({
       babel: {
         plugins: [['babel-plugin-react-compiler']],
-        base: provess.env.VITE_BASE_PATH || "/Capstone-Project",
       },
     }),
   ],

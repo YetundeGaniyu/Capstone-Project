@@ -110,12 +110,7 @@ export function VendorSignUp() {
               disabled={loading || !vendorType}
               className="btn btn-google btn-block"
             >
-<<<<<<< HEAD
-              <span className="google-icon">G</span>
-              {loading ? 'Signing up...' : 'Sign up with Google'}
-=======
               {loading ? "Signing up..." : "Sign up with Google"}
->>>>>>> ee3e5da7053a282d0778fb3624f14a44fc9c27ce
             </button>
 
             <div className="auth-footer">

@@ -33,16 +33,10 @@ export function UserSignUp() {
     <section className="page page-signup">
       <div className="page-width">
         <div className="card auth-card">
-<<<<<<< HEAD
-          <h1 className="page-title">Welcome to Ask Yello!</h1>
-          <p className="page-subtitle">
-            Connect with talented artisans and vendors for premium services
-=======
-          <h1 className="page-title">Welcome to Ask Yello</h1>
+<h1 className="page-title">Welcome to Ask Yello</h1>
           <p className="page-subtitle">
             Connect with talented artisans and service providers for premium
             services
->>>>>>> ee3e5da7053a282d0778fb3624f14a44fc9c27ce
           </p>
 
           {error && <div className="error-message">{error}</div>}
@@ -53,12 +47,7 @@ export function UserSignUp() {
             disabled={loading}
             className="btn btn-google btn-block"
           >
-<<<<<<< HEAD
-            <span className="google-icon">G</span>
-            {loading ? 'Signing up...' : 'Sign up with Google'}
-=======
             {loading ? "Signing up..." : "Sign up with Google"}
->>>>>>> ee3e5da7053a282d0778fb3624f14a44fc9c27ce
           </button>
 
           <div className="auth-divider"></div>

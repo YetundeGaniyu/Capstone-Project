@@ -1,21 +1,14 @@
-<<<<<<< HEAD
 import { useState } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
 import { doc, updateDoc, query, collection, where, getDocs } from 'firebase/firestore'
 import { db } from '../services/firebase'
 import { useAuth } from '../context/AuthContext'
-=======
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { useAuth } from "../context/AuthContext";
->>>>>>> ee3e5da7053a282d0778fb3624f14a44fc9c27ce
 
 export function VendorLogin() {
   const { signInWithGoogle, currentUser } = useAuth();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [credentials, setCredentials] = useState({
-<<<<<<< HEAD
     businessName: '',
     password: ''
   })
@@ -25,12 +18,6 @@ export function VendorLogin() {
   const navigate = useNavigate()
   const location = useLocation()
   const successMessage = location.state?.message
-=======
-    businessName: "",
-    password: "",
-  });
-  const navigate = useNavigate();
->>>>>>> ee3e5da7053a282d0778fb3624f14a44fc9c27ce
 
   // Redirect if already logged in
   if (currentUser) {
@@ -45,8 +32,7 @@ export function VendorLogin() {
       return;
     }
 
-<<<<<<< HEAD
-    setLoading(true)
+setLoading(true)
     setError('')
 
     try {
@@ -139,22 +125,10 @@ export function VendorLogin() {
     } catch (err) {
       console.error('OTP verification error:', err)
       setError('Verification failed. Please try again.')
-=======
-    setLoading(true);
-    setError("");
-    try {
-      // For now, we'll use Google auth as fallback
-      // In a real implementation, you'd have a separate auth system
-      await signInWithGoogle("vendor");
-      navigate("/dashboard");
-    } catch (err) {
-      setError("Invalid credentials. Please try again.");
-      console.error(err);
->>>>>>> ee3e5da7053a282d0778fb3624f14a44fc9c27ce
     } finally {
-      setLoading(false);
+      setLoading(false)
     }
-  };
+  }
 
   const handleInputChange = (e) => {
     setCredentials({
@@ -214,8 +188,7 @@ export function VendorLogin() {
                 />
               </div>
 
-<<<<<<< HEAD
-              <button
+<button
                 type="submit"
                 disabled={loading}
                 className="btn btn-vendor-login btn-block"
@@ -270,16 +243,6 @@ export function VendorLogin() {
               </div>
             </form>
           )}
-=======
-            <button
-              type="submit"
-              disabled={loading}
-              className="btn btn-primary btn-block"
-            >
-              {loading ? "Signing in..." : "Login"}
-            </button>
-          </form>
->>>>>>> ee3e5da7053a282d0778fb3624f14a44fc9c27ce
 
           <div className="auth-footer">
             <p>New Service provider?</p>
