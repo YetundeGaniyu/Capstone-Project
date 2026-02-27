@@ -58,6 +58,162 @@ body::before {
   z-index: -4;
 }
 
+.success-message {
+  padding: var(--space-sm) var(--space-md);
+  border-radius: var(--radius-md);
+  background: #d1fae5;
+  color: #065f46;
+  font-size: 0.9rem;
+  margin-bottom: var(--space-md);
+  border: 1px solid #10b981;
+}
+
+.otp-info {
+  background: var(--color-primary-soft);
+  padding: var(--space-md);
+  border-radius: var(--radius-md);
+  margin-bottom: var(--space-md);
+  border: 1px solid var(--color-primary);
+}
+
+.otp-info p {
+  margin: 0.25rem 0;
+  font-size: 0.9rem;
+}
+
+.otp-info strong {
+  color: var(--color-primary);
+}
+
+.otp-actions {
+  display: flex;
+  justify-content: center;
+  margin-top: var(--space-md);
+  gap: var(--space-sm);
+}
+
+.vendor-info {
+  background: var(--color-primary-soft);
+  padding: var(--space-md);
+  border-radius: var(--radius-md);
+  margin-bottom: var(--space-md);
+  border: 1px solid var(--color-primary);
+}
+
+.vendor-info p {
+  margin: 0.25rem 0;
+  font-size: 0.9rem;
+}
+
+.vendor-info strong {
+  color: var(--color-primary);
+}
+
+.working-hours-section {
+  margin-top: var(--space-lg);
+  padding: var(--space-md);
+  background: var(--color-primary-soft);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--color-primary);
+}
+
+.working-hours-section .section-title {
+  margin: 0 0 var(--space-md) 0;
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--color-primary);
+}
+
+.working-hours-grid {
+  display: grid;
+  gap: var(--space-sm);
+}
+
+.working-hours-day {
+  background: var(--color-surface);
+  padding: var(--space-sm);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--color-border-subtle);
+}
+
+.day-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--space-xs);
+}
+
+.closed-checkbox {
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+  font-size: 0.85rem;
+}
+
+.closed-checkbox input[type="checkbox"] {
+  margin: 0;
+}
+
+.time-inputs {
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+}
+
+.time-inputs input[type="time"] {
+  flex: 1;
+  padding: var(--space-xs);
+  border: 1px solid var(--color-border-subtle);
+  border-radius: var(--radius-md);
+  font-size: 0.9rem;
+}
+
+.time-inputs .time-select {
+  flex: 1;
+  padding: var(--space-xs);
+  border: 1px solid var(--color-border-subtle);
+  border-radius: var(--radius-md);
+  font-size: 0.9rem;
+  background: var(--color-surface);
+  min-width: 120px;
+}
+
+.time-inputs span {
+  color: var(--color-text-muted);
+  font-weight: 500;
+}
+
+.time-inputs input[type="time"]:disabled {
+  background: var(--color-border-subtle);
+  opacity: 0.6;
+}
+
+.time-inputs .time-select:disabled {
+  background: var(--color-border-subtle);
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+@media (max-width: 768px) {
+  .working-hours-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .day-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--space-xs);
+  }
+  
+  .time-inputs {
+    flex-wrap: wrap;
+  }
+  
+  .time-inputs input[type="time"] {
+    min-width: 120px;
+  }
+}
+
 .btn-admin {
   background: linear-gradient(135deg, var(--color-warm) 0%, var(--color-coral) 100%);
   color: #fff;

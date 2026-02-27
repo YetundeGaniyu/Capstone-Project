@@ -1,36 +1,55 @@
 import { useState, useEffect } from 'react'
-import { useLocation } from 'react-router-dom'
+import { useLocation, useNavigate } from 'react-router-dom'
 import { doc, setDoc } from 'firebase/firestore'
 import { db } from '../services/firebase'
-import { useAuth } from '../context/AuthContext'
 
 const CATEGORIES = [
-  'Fashion & tailoring',
-  'Catering & events',
-  'Repairs & maintenance',
-  'Branding & design',
-  'Photography & media',
+  'Logistics',
+  'Photography',
+  'Graphic design',
+  'Creative arts',
+  'Electrician',
+  'Plumber',
+  'Painter',
+  'Carpenter',
+  'Catering',
+  'Cleaning Services',
+  'Events',
+  'Fashion designing',
+  'Repairs',
+  'Hairstylist',
   'Other',
 ]
 
 export function VendorForm() {
-  const { currentUser } = useAuth()
   const location = useLocation()
   const prefilled = location.state?.prefilled
 
   const [formValues, setFormValues] = useState({
+    fullName: '',
     businessName: '',
+    email: '',
     category: '',
     description: '',
     phone: '',
     whatsapp: '',
     address: '',
-    latitude: '',
-    longitude: '',
+    password: '',
+    confirmPassword: '',
+    workingHours: {
+      monday: { open: '', close: '', closed: false },
+      tuesday: { open: '', close: '', closed: false },
+      wednesday: { open: '', close: '', closed: false },
+      thursday: { open: '', close: '', closed: false },
+      friday: { open: '', close: '', closed: false },
+      saturday: { open: '', close: '', closed: false },
+      sunday: { open: '', close: '', closed: false },
+    },
   })
   const [errors, setErrors] = useState({})
   const [saving, setSaving] = useState(false)
   const [savedMessage, setSavedMessage] = useState('')
+  const navigate = useNavigate()
 
   useEffect(() => {
     if (prefilled && typeof prefilled === 'object') {
@@ -48,29 +67,73 @@ export function VendorForm() {
     }
   }, [prefilled])
 
-  if (!currentUser) {
-    // Safety guard; route should already be protected
-    return null
-  }
+  // For new vendor registration, we don't require authentication
+  // The form will handle authentication during submission
 
   const handleChange = (event) => {
-    const { name, value } = event.target
-    setFormValues((prev) => ({
-      ...prev,
-      [name]: value,
-    }))
+    const { name, value, type, checked } = event.target
+    
+    if (name.includes('workingHours')) {
+      const [day, field] = name.split('.')
+      setFormValues((prev) => ({
+        ...prev,
+        workingHours: {
+          ...prev.workingHours,
+          [day]: {
+            ...prev.workingHours[day],
+            [field]: type === 'checkbox' ? checked : value,
+          },
+        },
+      }))
+    } else {
+      setFormValues((prev) => ({
+        ...prev,
+        [name]: value,
+      }))
+    }
+    
     setErrors((prev) => ({ ...prev, [name]: '' }))
     setSavedMessage('')
   }
 
   const validate = () => {
     const newErrors = {}
+    if (!formValues.fullName.trim()) newErrors.fullName = 'Full name is required'
     if (!formValues.businessName.trim()) newErrors.businessName = 'Business name is required'
+    if (!formValues.email.trim()) newErrors.email = 'Email is required'
+    if (!/\S+@\S+\.\S+/.test(formValues.email)) newErrors.email = 'Please enter a valid email'
     if (!formValues.category) newErrors.category = 'Category is required'
     if (!formValues.description.trim()) newErrors.description = 'Description is required'
     if (!formValues.phone.trim()) newErrors.phone = 'Phone number is required'
     if (!formValues.address.trim()) newErrors.address = 'Address is required'
+    if (!formValues.password) newErrors.password = 'Password is required'
+    if (formValues.password.length < 6) newErrors.password = 'Password must be at least 6 characters'
+    if (!formValues.confirmPassword) newErrors.confirmPassword = 'Please confirm your password'
+    if (formValues.password !== formValues.confirmPassword) newErrors.confirmPassword = 'Passwords do not match'
     return newErrors
+  }
+
+  const generateVendorId = () => {
+    return `VND_${Date.now()}_${Math.random().toString(36).substr(2, 9).toUpperCase()}`
+  }
+
+  const generateOTP = () => {
+    return Math.floor(100000 + Math.random() * 900000).toString()
+  }
+
+  const sendEmailConfirmation = async (vendorData, otp) => {
+    // This would integrate with an email service like SendGrid, Firebase Functions, etc.
+    // For now, we'll simulate the email sending
+    console.log('Email confirmation sent to:', vendorData.email)
+    console.log('Verification link:', `https://smeconnect.com/verify/${vendorData.vendorId}`)
+    console.log('OTP:', otp)
+    
+    // In a real implementation, you would:
+    // 1. Send email with verification link and OTP
+    // 2. Store OTP and expiration in database
+    // 3. Set expiration time (24 hours)
+    
+    return true
   }
 
   const handleSubmit = async (event) => {
@@ -85,29 +148,48 @@ export function VendorForm() {
     setSavedMessage('')
 
     try {
-      const vendorRef = doc(db, 'vendors', currentUser.uid)
-      const lat = Number(formValues.latitude)
-        const lng = Number(formValues.longitude)
-        const payload = {
-          userId: currentUser.uid,
-          businessName: formValues.businessName.trim(),
-          category: formValues.category,
-          description: formValues.description.trim(),
-          phone: formValues.phone.trim(),
-          whatsapp: formValues.whatsapp.trim(),
-          address: formValues.address.trim(),
-          updatedAt: new Date().toISOString(),
-        }
-        if (!Number.isNaN(lat) && !Number.isNaN(lng)) {
-          payload.latitude = lat
-          payload.longitude = lng
-        }
-        await setDoc(vendorRef, payload, { merge: true })
+      const vendorId = generateVendorId()
+      const otp = generateOTP()
+      const expirationTime = new Date(Date.now() + 24 * 60 * 60 * 1000) // 24 hours from now
+      
+      const vendorData = {
+        vendorId,
+        fullName: formValues.fullName.trim(),
+        businessName: formValues.businessName.trim(),
+        category: formValues.category,
+        description: formValues.description.trim(),
+        phone: formValues.phone.trim(),
+        whatsapp: formValues.whatsapp.trim(),
+        address: formValues.address.trim(),
+        password: formValues.password, // In production, this should be hashed
+        workingHours: formValues.workingHours,
+        email: formValues.email.trim(),
+        createdAt: new Date().toISOString(),
+        status: 'pending_verification',
+        emailVerified: false,
+        otpVerified: false,
+        otp: otp,
+        otpExpiration: expirationTime.toISOString(),
+        verificationLinkExpiration: expirationTime.toISOString(),
+      }
 
-      setSavedMessage('Your vendor profile has been saved.')
+      // Store vendor data in Firestore
+      const vendorRef = doc(db, 'vendors', vendorId)
+      await setDoc(vendorRef, vendorData)
+
+      // Send email confirmation with OTP
+      await sendEmailConfirmation(vendorData, otp)
+
+      setSavedMessage('Vendor profile created! Please check your email for verification link and OTP.')
+      
+      // Redirect to vendor login after successful registration
+      setTimeout(() => {
+        navigate('/login/vendor')
+      }, 3000)
+      
     } catch (error) {
-      console.error('Error saving vendor profile:', error)
-      setSavedMessage('Something went wrong while saving. Please try again.')
+      console.error('Error creating vendor profile:', error)
+      setSavedMessage('Something went wrong while creating your profile. Please try again.')
     } finally {
       setSaving(false)
     }
@@ -117,14 +199,27 @@ export function VendorForm() {
     <section className="page page-vendor-form">
       <div className="page-width">
         <div className="card auth-card">
-          <h1 className="page-title">Vendor profile</h1>
+          <h1 className="page-title">Create Vendor Profile</h1>
           <p className="page-subtitle">
-            Share basic details about your business so customers can discover and contact you.
+            Complete your vendor profile to start connecting with customers.
           </p>
 
           <form className="form" onSubmit={handleSubmit} noValidate>
             <label className="field">
-              <span className="field-label">Business name</span>
+              <span className="field-label">Full Name</span>
+              <input
+                className="field-input"
+                name="fullName"
+                type="text"
+                value={formValues.fullName}
+                onChange={handleChange}
+                placeholder="John Doe"
+              />
+              {errors.fullName && <span className="field-error">{errors.fullName}</span>}
+            </label>
+
+            <label className="field">
+              <span className="field-label">Business Name</span>
               <input
                 className="field-input"
                 name="businessName"
@@ -137,7 +232,20 @@ export function VendorForm() {
             </label>
 
             <label className="field">
-              <span className="field-label">Category</span>
+              <span className="field-label">Email Address</span>
+              <input
+                className="field-input"
+                name="email"
+                type="email"
+                value={formValues.email}
+                onChange={handleChange}
+                placeholder="john@example.com"
+              />
+              {errors.email && <span className="field-error">{errors.email}</span>}
+            </label>
+
+            <label className="field">
+              <span className="field-label">Service Category</span>
               <select
                 className="field-input"
                 name="category"
@@ -168,7 +276,7 @@ export function VendorForm() {
             </label>
 
             <label className="field">
-              <span className="field-label">Phone number</span>
+              <span className="field-label">Phone Number</span>
               <input
                 className="field-input"
                 name="phone"
@@ -181,7 +289,7 @@ export function VendorForm() {
             </label>
 
             <label className="field">
-              <span className="field-label">WhatsApp link (optional)</span>
+              <span className="field-label">WhatsApp Link (optional)</span>
               <input
                 className="field-input"
                 name="whatsapp"
@@ -200,40 +308,118 @@ export function VendorForm() {
                 type="text"
                 value={formValues.address}
                 onChange={handleChange}
-                placeholder="Lagos, Nigeria"
+                placeholder="123 Main Street, Lagos, Nigeria"
               />
               {errors.address && <span className="field-error">{errors.address}</span>}
             </label>
 
-            <div className="field-row">
-              <label className="field">
-                <span className="field-label">Latitude (optional)</span>
-                <input
-                  className="field-input"
-                  name="latitude"
-                  type="number"
-                  step="any"
-                  value={formValues.latitude}
-                  onChange={handleChange}
-                  placeholder="6.5244"
-                />
-              </label>
-              <label className="field">
-                <span className="field-label">Longitude (optional)</span>
-                <input
-                  className="field-input"
-                  name="longitude"
-                  type="number"
-                  step="any"
-                  value={formValues.longitude}
-                  onChange={handleChange}
-                  placeholder="3.3792"
-                />
-              </label>
+            <label className="field">
+              <span className="field-label">Password</span>
+              <input
+                className="field-input"
+                name="password"
+                type="password"
+                value={formValues.password}
+                onChange={handleChange}
+                placeholder="Create a secure password"
+              />
+              {errors.password && <span className="field-error">{errors.password}</span>}
+            </label>
+
+            <label className="field">
+              <span className="field-label">Confirm Password</span>
+              <input
+                className="field-input"
+                name="confirmPassword"
+                type="password"
+                value={formValues.confirmPassword}
+                onChange={handleChange}
+                placeholder="Confirm your password"
+              />
+              {errors.confirmPassword && <span className="field-error">{errors.confirmPassword}</span>}
+            </label>
+
+            <div className="working-hours-section">
+              <h3 className="section-title">Working Hours</h3>
+              <div className="working-hours-grid">
+                {Object.entries(formValues.workingHours).map(([day, hours]) => (
+                  <div key={day} className="working-hours-day">
+                    <label className="field">
+                      <div className="day-header">
+                        <span className="field-label">{day.charAt(0).toUpperCase() + day.slice(1)}</span>
+                        <div className="closed-checkbox">
+                          <input
+                            type="checkbox"
+                            name={`${day}.closed`}
+                            checked={hours.closed}
+                            onChange={handleChange}
+                          />
+                          <label htmlFor={`${day}.closed`}>Closed</label>
+                        </div>
+                      </div>
+                      <div className="time-inputs">
+                        <select
+                          name={`${day}.open`}
+                          value={hours.open}
+                          onChange={handleChange}
+                          disabled={hours.closed}
+                          className="field-input time-select"
+                        >
+                          <option value="">Open Time</option>
+                          <option value="06:00">6:00 AM</option>
+                          <option value="07:00">7:00 AM</option>
+                          <option value="08:00">8:00 AM</option>
+                          <option value="09:00">9:00 AM</option>
+                          <option value="10:00">10:00 AM</option>
+                          <option value="11:00">11:00 AM</option>
+                          <option value="12:00">12:00 PM</option>
+                          <option value="13:00">1:00 PM</option>
+                          <option value="14:00">2:00 PM</option>
+                          <option value="15:00">3:00 PM</option>
+                          <option value="16:00">4:00 PM</option>
+                          <option value="17:00">5:00 PM</option>
+                          <option value="18:00">6:00 PM</option>
+                          <option value="19:00">7:00 PM</option>
+                          <option value="20:00">8:00 PM</option>
+                          <option value="21:00">9:00 PM</option>
+                          <option value="22:00">10:00 PM</option>
+                        </select>
+                        <span>-</span>
+                        <select
+                          name={`${day}.close`}
+                          value={hours.close}
+                          onChange={handleChange}
+                          disabled={hours.closed}
+                          className="field-input time-select"
+                        >
+                          <option value="">Close Time</option>
+                          <option value="10:00">10:00 AM</option>
+                          <option value="11:00">11:00 AM</option>
+                          <option value="12:00">12:00 PM</option>
+                          <option value="13:00">1:00 PM</option>
+                          <option value="14:00">2:00 PM</option>
+                          <option value="15:00">3:00 PM</option>
+                          <option value="16:00">4:00 PM</option>
+                          <option value="17:00">5:00 PM</option>
+                          <option value="18:00">6:00 PM</option>
+                          <option value="19:00">7:00 PM</option>
+                          <option value="20:00">8:00 PM</option>
+                          <option value="21:00">9:00 PM</option>
+                          <option value="22:00">10:00 PM</option>
+                          <option value="23:00">11:00 PM</option>
+                          <option value="00:00">12:00 AM</option>
+                          <option value="01:00">1:00 AM</option>
+                          <option value="02:00">2:00 AM</option>
+                        </select>
+                      </div>
+                    </label>
+                  </div>
+                ))}
+              </div>
             </div>
 
             <button type="submit" className="btn btn-primary btn-block" disabled={saving}>
-              {saving ? 'Saving profile...' : 'Save profile'}
+              {saving ? 'Creating Profile...' : 'Create Vendor Profile'}
             </button>
 
             {savedMessage && <p className="field-help">{savedMessage}</p>}

@@ -52,11 +52,6 @@ export function Login() {
             <p>New user?</p>
             <a href="/signup/user" className="link">Create an account</a>
           </div>
-          
-          <div className="auth-footer">
-            <p>Are you a vendor?</p>
-            <a href="/login/vendor" className="link">Sign in as vendor</a>
-          </div>
         </div>
       </div>
     </section>
