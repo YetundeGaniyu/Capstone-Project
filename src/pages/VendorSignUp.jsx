@@ -1,53 +1,53 @@
-import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
-import { useAuth } from '../context/AuthContext'
-import { OnboardingChatbot } from '../components/OnboardingChatbot'
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
+import { OnboardingChatbot } from "../components/OnboardingChatbot";
 
 export function VendorSignUp() {
-  const { signInWithGoogle, currentUser } = useAuth()
-  const [loading, setLoading] = useState(false)
-  const [error, setError] = useState('')
-  const [vendorType, setVendorType] = useState('')
-  const [showOnboarding, setShowOnboarding] = useState(false)
-  const [onboardingData, setOnboardingData] = useState({})
-  const navigate = useNavigate()
+  const { signInWithGoogle, currentUser } = useAuth();
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+  const [vendorType, setVendorType] = useState("");
+  const [showOnboarding, setShowOnboarding] = useState(false);
+  const [onboardingData, setOnboardingData] = useState({});
+  const navigate = useNavigate();
 
   // Redirect if already logged in
   if (currentUser) {
-    navigate('/dashboard')
-    return null
+    navigate("/dashboard");
+    return null;
   }
 
   const handleGoogleSignUp = async () => {
     if (!vendorType) {
-      setError('Please select whether you are a new or existing vendor')
-      return
+      setError("Please select whether you are a new or existing vendor");
+      return;
     }
 
-    setLoading(true)
-    setError('')
+    setLoading(true);
+    setError("");
     try {
-      await signInWithGoogle('vendor')
-      
+      await signInWithGoogle("vendor");
+
       // Show onboarding chatbot for new vendors
-      if (vendorType === 'new') {
-        setShowOnboarding(true)
+      if (vendorType === "new") {
+        setShowOnboarding(true);
       } else {
-        navigate('/vendor/profile')
+        navigate("/vendor/profile");
       }
     } catch (err) {
-      setError('Failed to sign up. Please try again.')
-      console.error(err)
+      setError("Failed to sign up. Please try again.");
+      console.error(err);
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   const handleOnboardingComplete = (data) => {
-    setOnboardingData(data)
+    setOnboardingData(data);
     // Navigate to vendor form with pre-filled data
-    navigate('/vendor/profile', { state: { prefillData: data } })
-  }
+    navigate("/vendor/profile", { state: { prefillData: data } });
+  };
 
   return (
     <section className="page page-vendor-signup">
@@ -58,27 +58,27 @@ export function VendorSignUp() {
           </div>
         ) : (
           <div className="card auth-card">
-            <h1 className="page-title">Sign up as Vendor/Artisan</h1>
+            <h1 className="page-title">Sign up as Service Provider</h1>
             <p className="page-subtitle">
               Showcase your services and connect with SMEs
             </p>
 
             <div className="vendor-type-selection">
-              <h3>Are you a new or existing vendor?</h3>
+              <h3>Are you a new or existing service provider?</h3>
               <div className="vendor-options">
                 <label className="vendor-option">
                   <input
                     type="radio"
                     name="vendorType"
                     value="new"
-                    checked={vendorType === 'new'}
+                    checked={vendorType === "new"}
                     onChange={(e) => setVendorType(e.target.value)}
                     className="vendor-radio"
                   />
                   <div className="vendor-card">
-                    <h4 className="vendor-title">New Vendor</h4>
+                    <h4 className="vendor-title">New Service Provider</h4>
                     <p className="vendor-description">
-                      I'm new and want to create my vendor profile
+                      I'm new and want to create my business profile
                     </p>
                   </div>
                 </label>
@@ -88,14 +88,14 @@ export function VendorSignUp() {
                     type="radio"
                     name="vendorType"
                     value="existing"
-                    checked={vendorType === 'existing'}
+                    checked={vendorType === "existing"}
                     onChange={(e) => setVendorType(e.target.value)}
                     className="vendor-radio"
                   />
                   <div className="vendor-card">
-                    <h4 className="vendor-title">Existing Vendor</h4>
+                    <h4 className="vendor-title">Existing Service Provider</h4>
                     <p className="vendor-description">
-                      I already have a vendor profile and want to manage it
+                      I already have a business profile and want to manage it
                     </p>
                   </div>
                 </label>
@@ -108,18 +108,25 @@ export function VendorSignUp() {
               type="button"
               onClick={handleGoogleSignUp}
               disabled={loading || !vendorType}
-              className="btn btn-primary btn-block"
+              className="btn btn-google btn-block"
             >
+<<<<<<< HEAD
+              <span className="google-icon">G</span>
               {loading ? 'Signing up...' : 'Sign up with Google'}
+=======
+              {loading ? "Signing up..." : "Sign up with Google"}
+>>>>>>> ee3e5da7053a282d0778fb3624f14a44fc9c27ce
             </button>
 
             <div className="auth-footer">
               <p>Already have an account?</p>
-              <a href="/login" className="link">Sign in</a>
+              <a href="/login" className="link">
+                Sign in
+              </a>
             </div>
           </div>
         )}
       </div>
     </section>
-  )
+  );
 }

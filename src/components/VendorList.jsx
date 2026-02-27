@@ -148,7 +148,7 @@ export function VendorList() {
     <section className="page page-vendor-list">
       <div className="page-width">
         <header className="page-header">
-          <h1 className="page-title">Browse vendors</h1>
+          <h1 className="page-title">Search for vendors</h1>
           <p className="page-subtitle">
             Find service providers by category or search by name, description, or location.
           </p>

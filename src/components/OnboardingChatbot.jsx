@@ -1,11 +1,20 @@
 import { useState, useEffect, useRef } from 'react'
 
 const CATEGORIES = [
-  'Fashion & tailoring',
-  'Catering & events',
-  'Repairs & maintenance',
-  'Branding & design',
-  'Photography & media',
+  'Logistics',
+  'Photography',
+  'Graphic design',
+  'Creative arts',
+  'Electrician',
+  'Plumber',
+  'Painter',
+  'Carpenter',
+  'Catering',
+  'Cleaning Services',
+  'Events',
+  'Fashion designing',
+  'Repairs',
+  'Hairstylist',
   'Other',
 ]
 

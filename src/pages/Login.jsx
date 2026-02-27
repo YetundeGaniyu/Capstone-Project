@@ -32,7 +32,7 @@ export function Login() {
     <section className="page page-login">
       <div className="page-width">
         <div className="card auth-card">
-          <h1 className="page-title">User Sign In</h1>
+          <h1 className="page-title">Welcome Back!</h1>
           <p className="page-subtitle">
             Sign in to find and connect with trusted service providers
           </p>
@@ -43,19 +43,25 @@ export function Login() {
             type="button"
             onClick={handleGoogleSignIn}
             disabled={loading}
-            className="btn btn-primary btn-block"
+            className="btn btn-google btn-block"
           >
+            <span className="google-icon">G</span>
             {loading ? 'Signing in...' : 'Continue with Google'}
           </button>
 
+          <div className="auth-divider"></div>
+
           <div className="auth-footer">
             <p>New user?</p>
-            <a href="/signup/user" className="link">Create an account</a>
+            <a href="/signup/user" className="link">Sign up</a>
+<<<<<<< HEAD
+=======
           </div>
           
           <div className="auth-footer">
             <p>Are you a vendor?</p>
             <a href="/login/vendor" className="link">Sign in as vendor</a>
+>>>>>>> ee3e5da7053a282d0778fb3624f14a44fc9c27ce
           </div>
         </div>
       </div>

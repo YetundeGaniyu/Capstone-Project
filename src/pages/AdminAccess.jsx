@@ -3,20 +3,46 @@ import { useNavigate } from 'react-router-dom'
 
 export function AdminAccess() {
   const [credentials, setCredentials] = useState({
-    username: '',
-    password: ''
+    email: '',
+    password: '',
+    adminKey: ''
   })
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const navigate = useNavigate()
 
+  // Check admin session
+  const checkAdminSession = () => {
+    const session = localStorage.getItem('adminSession')
+    if (session) {
+      try {
+        const sessionData = JSON.parse(session)
+        const sessionAge = Date.now() - new Date(sessionData.timestamp).getTime()
+        // Session expires after 24 hours
+        return sessionAge < 24 * 60 * 60 * 1000 && sessionData.loggedIn
+      } catch (error) {
+        console.error('Error parsing admin session:', error)
+        return false
+      }
+    }
+    return false
+  }
+
+  // Check if user is admin
+  const isAdmin = checkAdminSession()
+
   const handleSubmit = async (e) => {
     e.preventDefault()
     
     console.log('Admin login attempt:', credentials)
+    console.log('Form values:', {
+      email: credentials.email,
+      password: credentials.password,
+      adminKey: credentials.adminKey
+    })
     
-    if (!credentials.username || !credentials.password) {
-      setError('Please enter both username and password')
+    if (!credentials.email || !credentials.password || !credentials.adminKey) {
+      setError('Please enter email, password, and admin key')
       return
     }
 
@@ -24,31 +50,51 @@ export function AdminAccess() {
     setError('')
 
     try {
-      // Admin credentials
+      // Admin credentials - trim input values to prevent whitespace issues
       const ADMIN_CREDENTIALS = {
-        username: 'admin@smeconnect.com',
-        password: 'Admin@2024!Secure'
+        email: 'admin@smeconnect.com',
+        password: 'Admin@2024!Secure',
+        adminKey: 'ADMIN-2024-KEY'
+      }
+      
+      const trimmedCredentials = {
+        email: credentials.email.trim(),
+        password: credentials.password.trim(),
+        adminKey: credentials.adminKey.trim()
       }
       
       console.log('Expected credentials:', ADMIN_CREDENTIALS)
-      console.log('Username match:', credentials.username === ADMIN_CREDENTIALS.username)
-      console.log('Password match:', credentials.password === ADMIN_CREDENTIALS.password)
+      console.log('Submitted credentials:', trimmedCredentials)
+      console.log('Email match:', trimmedCredentials.email === ADMIN_CREDENTIALS.email)
+      console.log('Password match:', trimmedCredentials.password === ADMIN_CREDENTIALS.password)
+      console.log('Admin key match:', trimmedCredentials.adminKey === ADMIN_CREDENTIALS.adminKey)
       
-      if (credentials.username === ADMIN_CREDENTIALS.username && 
-          credentials.password === ADMIN_CREDENTIALS.password) {
+      if (trimmedCredentials.email === ADMIN_CREDENTIALS.email && 
+          trimmedCredentials.password === ADMIN_CREDENTIALS.password &&
+          trimmedCredentials.adminKey === ADMIN_CREDENTIALS.adminKey) {
         
         console.log('Authentication successful!')
         
         // Store admin session
         const sessionData = {
           loggedIn: true,
-          timestamp: new Date().toISOString()
+          timestamp: new Date().toISOString(),
+          email: trimmedCredentials.email
         }
+        
+        console.log('Storing session:', sessionData)
         localStorage.setItem('adminSession', JSON.stringify(sessionData))
         
-        console.log('Session stored:', sessionData)
+        // Verify session was stored
+        const storedSession = localStorage.getItem('adminSession')
+        console.log('Session verification:', storedSession)
         
-        navigate('/admin/dashboard')
+        // Small delay to ensure localStorage is set
+        setTimeout(() => {
+          console.log('Navigating to dashboard...')
+          navigate('/admin/dashboard')
+        }, 100)
+        
       } else {
         console.log('Authentication failed!')
         setError('Invalid admin credentials')
@@ -84,24 +130,24 @@ export function AdminAccess() {
             
             <form className="form" onSubmit={handleSubmit}>
               <div className="form-group">
-                <label htmlFor="username" className="form-label">
-                  Admin Username
+                <label htmlFor="email" className="form-label">
+                  Email
                 </label>
                 <input
-                  type="text"
-                  id="username"
-                  name="username"
-                  value={credentials.username}
+                  type="email"
+                  id="email"
+                  name="email"
+                  value={credentials.email}
                   onChange={handleInputChange}
                   className="form-input"
-                  placeholder="Enter admin username"
+                  placeholder="Enter admin email"
                   required
                 />
               </div>
 
               <div className="form-group">
                 <label htmlFor="password" className="form-label">
-                  Admin Password
+                  Password
                 </label>
                 <input
                   type="password"
@@ -111,6 +157,22 @@ export function AdminAccess() {
                   onChange={handleInputChange}
                   className="form-input"
                   placeholder="Enter admin password"
+                  required
+                />
+              </div>
+
+              <div className="form-group">
+                <label htmlFor="adminKey" className="form-label">
+                  Admin Key
+                </label>
+                <input
+                  type="text"
+                  id="adminKey"
+                  name="adminKey"
+                  value={credentials.adminKey}
+                  onChange={handleInputChange}
+                  className="form-input"
+                  placeholder="Enter admin key"
                   required
                 />
               </div>
@@ -135,21 +197,6 @@ export function AdminAccess() {
               <a href="/login" className="link">User Login</a>
             </div>
 
-            <div className="admin-test-section">
-              <button 
-                onClick={() => {
-                  const testCreds = {
-                    username: 'admin@smeconnect.com',
-                    password: 'Admin@2024!Secure'
-                  }
-                  setCredentials(testCreds)
-                  console.log('Test credentials filled:', testCreds)
-                }}
-                className="btn btn-secondary btn-sm"
-              >
-                Fill Test Credentials
-              </button>
-            </div>
           </div>
         </div>
       </div>

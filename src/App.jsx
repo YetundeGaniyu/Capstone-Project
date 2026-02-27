@@ -19,6 +19,7 @@ import { ProtectedRoute } from './components/ProtectedRoute.jsx'
 import { VendorForm } from './components/VendorForm.jsx'
 import { VendorList } from './components/VendorList.jsx'
 import { VendorOnboarding } from './pages/VendorOnboarding.jsx'
+import { VendorOTPVerification } from './pages/VendorOTPVerification.jsx'
 import './styles/global.css'
 
 function App() {
@@ -35,7 +36,7 @@ function App() {
             <Route path="/signup" element={<SignUpSelection />} />
             <Route path="/signup/user" element={<UserSignUp />} />
             <Route path="/signup/vendor" element={<VendorSignUp />} />
-            <Route path="/vendor/create" element={<VendorCreate />} />
+            <Route path="/vendor/create" element={<VendorForm />} />
             <Route path="/role-selection" element={<RoleSelection />} />
             <Route
               path="/admin/dashboard"
@@ -69,6 +70,7 @@ function App() {
                 </ProtectedRoute>
               }
             />
+            <Route path="/verify/vendor" element={<VendorOTPVerification />} />
             <Route path="/vendors" element={<VendorList />} />
             <Route path="/vendors/:id" element={<VendorProfile />} />
           </Routes>
