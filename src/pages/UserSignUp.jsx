@@ -1,41 +1,48 @@
-import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
-import { useAuth } from '../context/AuthContext'
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
 
 export function UserSignUp() {
-  const { signInWithGoogle, currentUser } = useAuth()
-  const [loading, setLoading] = useState(false)
-  const [error, setError] = useState('')
-  const navigate = useNavigate()
+  const { signInWithGoogle, currentUser } = useAuth();
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+  const navigate = useNavigate();
 
   // Redirect if already logged in
   if (currentUser) {
-    navigate('/dashboard')
-    return null
+    navigate("/dashboard");
+    return null;
   }
 
   const handleGoogleSignUp = async () => {
-    setLoading(true)
-    setError('')
+    setLoading(true);
+    setError("");
     try {
-      await signInWithGoogle('user')
+      await signInWithGoogle("user");
       // Navigate to dashboard since role is set
-      navigate('/dashboard')
+      navigate("/dashboard");
     } catch (err) {
-      setError('Failed to sign up. Please try again.')
-      console.error(err)
+      setError("Failed to sign up. Please try again.");
+      console.error(err);
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   return (
     <section className="page page-signup">
       <div className="page-width">
         <div className="card auth-card">
+<<<<<<< HEAD
           <h1 className="page-title">Welcome to Ask Yello!</h1>
           <p className="page-subtitle">
             Connect with talented artisans and vendors for premium services
+=======
+          <h1 className="page-title">Welcome to Ask Yello</h1>
+          <p className="page-subtitle">
+            Connect with talented artisans and service providers for premium
+            services
+>>>>>>> ee3e5da7053a282d0778fb3624f14a44fc9c27ce
           </p>
 
           {error && <div className="error-message">{error}</div>}
@@ -46,18 +53,24 @@ export function UserSignUp() {
             disabled={loading}
             className="btn btn-google btn-block"
           >
+<<<<<<< HEAD
             <span className="google-icon">G</span>
             {loading ? 'Signing up...' : 'Sign up with Google'}
+=======
+            {loading ? "Signing up..." : "Sign up with Google"}
+>>>>>>> ee3e5da7053a282d0778fb3624f14a44fc9c27ce
           </button>
 
           <div className="auth-divider"></div>
 
           <div className="auth-footer">
             <p>Already have an account?</p>
-            <a href="/login" className="link">Sign in</a>
+            <a href="/login" className="link">
+              Sign in
+            </a>
           </div>
         </div>
       </div>
     </section>
-  )
+  );
 }
