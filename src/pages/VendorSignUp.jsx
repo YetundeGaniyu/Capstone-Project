@@ -108,8 +108,9 @@ export function VendorSignUp() {
               type="button"
               onClick={handleGoogleSignUp}
               disabled={loading || !vendorType}
-              className="btn btn-primary btn-block"
+              className="btn btn-google btn-block"
             >
+              <span className="google-icon">G</span>
               {loading ? 'Signing up...' : 'Sign up with Google'}
             </button>
 

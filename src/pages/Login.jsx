@@ -32,7 +32,7 @@ export function Login() {
     <section className="page page-login">
       <div className="page-width">
         <div className="card auth-card">
-          <h1 className="page-title">User Sign In</h1>
+          <h1 className="page-title">Welcome Back!</h1>
           <p className="page-subtitle">
             Sign in to find and connect with trusted service providers
           </p>
@@ -43,8 +43,9 @@ export function Login() {
             type="button"
             onClick={handleGoogleSignIn}
             disabled={loading}
-            className="btn btn-primary btn-block"
+            className="btn btn-google btn-block"
           >
+            <span className="google-icon">G</span>
             {loading ? 'Signing in...' : 'Continue with Google'}
           </button>
 

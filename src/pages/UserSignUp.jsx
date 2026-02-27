@@ -33,9 +33,9 @@ export function UserSignUp() {
     <section className="page page-signup">
       <div className="page-width">
         <div className="card auth-card">
-          <h1 className="page-title">Sign up as SME Owner</h1>
+          <h1 className="page-title">Welcome to Ask Yello!</h1>
           <p className="page-subtitle">
-            Connect with talented artisans and vendors for your business needs
+            Connect with talented artisans and vendors for premium services
           </p>
 
           {error && <div className="error-message">{error}</div>}
@@ -44,8 +44,9 @@ export function UserSignUp() {
             type="button"
             onClick={handleGoogleSignUp}
             disabled={loading}
-            className="btn btn-primary btn-block"
+            className="btn btn-google btn-block"
           >
+            <span className="google-icon">G</span>
             {loading ? 'Signing up...' : 'Sign up with Google'}
           </button>
 

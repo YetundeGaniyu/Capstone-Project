@@ -14,7 +14,7 @@ export function Home() {
             </p>
             <div className="hero-actions">
               <a href="/vendors" className="btn btn-primary">
-                Explore dashboard
+                Take a Tour
               </a>
               <a href="/login/vendor" className="btn btn-ghost">
                 Login as Vendor
@@ -24,24 +24,27 @@ export function Home() {
         </div>
 
         <section className="section">
-          <h2 className="section-title">Why Ask Yello!?</h2>
+          <h2 className="section-title">Why Ask Yello!</h2>
           <div className="feature-grid">
             <div className="feature-card">
               <h3 className="feature-title">Verified Vendors</h3>
               <p className="feature-body">
-                View profiles with services, location, and sample work so you can make confident decisions.
+                Access verified vendor profiles with clear service details,
+                location information, and sample work so you can choose with confidence
               </p>
             </div>
             <div className="feature-card">
               <h3 className="feature-title">Simple Vendor Overview</h3>
               <p className="feature-body">
-                A simple dashboard to see key vendors at a glance without overwhelming navigation.
+                A simple dashboard that highlights key vendors at a glance, 
+                without complex or overwhelming navigation.
               </p>
             </div>
             <div className="feature-card">
               <h3 className="feature-title">Built for SMEs</h3>
               <p className="feature-body">
-              Designed for business owners who need visibility, boost their business growth and reach more customers            </p>
+              Designed for  small and medium business owners seeking greater visibility,
+              expand their reach and have meaningful connections with more customers </p>
             </div>
           </div>
         </section>

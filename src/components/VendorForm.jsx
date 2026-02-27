@@ -72,28 +72,43 @@ export function VendorForm() {
 
   const handleChange = (event) => {
     const { name, value, type, checked } = event.target
-    
-    if (name.includes('workingHours')) {
-      const [day, field] = name.split('.')
-      setFormValues((prev) => ({
+    setFormValues((prev) => {
+      if (name === 'workingHours') {
+        return {
+          ...prev,
+          workingHours: JSON.parse(value)
+        }
+      }
+      if (name.includes('.')) {
+        const [field, subField] = name.split('.')
+        return {
+          ...prev,
+          [field]: {
+            ...prev[field],
+            [subField]: type === 'checkbox' ? checked : value
+          }
+        }
+      }
+      return {
         ...prev,
-        workingHours: {
-          ...prev.workingHours,
-          [day]: {
-            ...prev.workingHours[day],
-            [field]: type === 'checkbox' ? checked : value,
-          },
-        },
-      }))
-    } else {
-      setFormValues((prev) => ({
+        [name]: value
+      }
+    })
+    // Clear error for this field when user starts typing
+    if (errors[name]) {
+      setErrors((prev) => ({
         ...prev,
-        [name]: value,
+        [name]: ''
       }))
     }
-    
-    setErrors((prev) => ({ ...prev, [name]: '' }))
-    setSavedMessage('')
+  }
+
+  const handleWorkingHoursChange = (event) => {
+    const workingHours = JSON.parse(event.target.value)
+    setFormValues(prev => ({
+      ...prev,
+      workingHours
+    }))
   }
 
   const validate = () => {
@@ -196,12 +211,12 @@ export function VendorForm() {
   }
 
   return (
-    <section className="page page-vendor-form">
+    <section className="page page-vendor-create">
       <div className="page-width">
-        <div className="card auth-card">
-          <h1 className="page-title">Create Vendor Profile</h1>
+        <div className="card">
+          <h1 className="page-title">Create Business Profile</h1>
           <p className="page-subtitle">
-            Complete your vendor profile to start connecting with customers.
+            Tell us about your business to get started.
           </p>
 
           <form className="form" onSubmit={handleSubmit} noValidate>
@@ -270,13 +285,13 @@ export function VendorForm() {
                 rows="4"
                 value={formValues.description}
                 onChange={handleChange}
-                placeholder="Short overview of your services, ideal order sizes, and typical clients."
+                placeholder="Describe what services you offer...."
               />
               {errors.description && <span className="field-error">{errors.description}</span>}
             </label>
 
             <label className="field">
-              <span className="field-label">Phone Number</span>
+              <span className="field-label">Phone Number (Preferrably WhatsApp Number)</span>
               <input
                 className="field-input"
                 name="phone"
@@ -286,18 +301,6 @@ export function VendorForm() {
                 placeholder="+234..."
               />
               {errors.phone && <span className="field-error">{errors.phone}</span>}
-            </label>
-
-            <label className="field">
-              <span className="field-label">WhatsApp Link (optional)</span>
-              <input
-                className="field-input"
-                name="whatsapp"
-                type="url"
-                value={formValues.whatsapp}
-                onChange={handleChange}
-                placeholder="https://wa.me/..."
-              />
             </label>
 
             <label className="field">
@@ -340,82 +343,35 @@ export function VendorForm() {
             </label>
 
             <div className="working-hours-section">
-              <h3 className="section-title">Working Hours</h3>
-              <div className="working-hours-grid">
-                {Object.entries(formValues.workingHours).map(([day, hours]) => (
-                  <div key={day} className="working-hours-day">
-                    <label className="field">
-                      <div className="day-header">
-                        <span className="field-label">{day.charAt(0).toUpperCase() + day.slice(1)}</span>
-                        <div className="closed-checkbox">
-                          <input
-                            type="checkbox"
-                            name={`${day}.closed`}
-                            checked={hours.closed}
-                            onChange={handleChange}
-                          />
-                          <label htmlFor={`${day}.closed`}>Closed</label>
-                        </div>
-                      </div>
-                      <div className="time-inputs">
-                        <select
-                          name={`${day}.open`}
-                          value={hours.open}
-                          onChange={handleChange}
-                          disabled={hours.closed}
-                          className="field-input time-select"
-                        >
-                          <option value="">Open Time</option>
-                          <option value="06:00">6:00 AM</option>
-                          <option value="07:00">7:00 AM</option>
-                          <option value="08:00">8:00 AM</option>
-                          <option value="09:00">9:00 AM</option>
-                          <option value="10:00">10:00 AM</option>
-                          <option value="11:00">11:00 AM</option>
-                          <option value="12:00">12:00 PM</option>
-                          <option value="13:00">1:00 PM</option>
-                          <option value="14:00">2:00 PM</option>
-                          <option value="15:00">3:00 PM</option>
-                          <option value="16:00">4:00 PM</option>
-                          <option value="17:00">5:00 PM</option>
-                          <option value="18:00">6:00 PM</option>
-                          <option value="19:00">7:00 PM</option>
-                          <option value="20:00">8:00 PM</option>
-                          <option value="21:00">9:00 PM</option>
-                          <option value="22:00">10:00 PM</option>
-                        </select>
-                        <span>-</span>
-                        <select
-                          name={`${day}.close`}
-                          value={hours.close}
-                          onChange={handleChange}
-                          disabled={hours.closed}
-                          className="field-input time-select"
-                        >
-                          <option value="">Close Time</option>
-                          <option value="10:00">10:00 AM</option>
-                          <option value="11:00">11:00 AM</option>
-                          <option value="12:00">12:00 PM</option>
-                          <option value="13:00">1:00 PM</option>
-                          <option value="14:00">2:00 PM</option>
-                          <option value="15:00">3:00 PM</option>
-                          <option value="16:00">4:00 PM</option>
-                          <option value="17:00">5:00 PM</option>
-                          <option value="18:00">6:00 PM</option>
-                          <option value="19:00">7:00 PM</option>
-                          <option value="20:00">8:00 PM</option>
-                          <option value="21:00">9:00 PM</option>
-                          <option value="22:00">10:00 PM</option>
-                          <option value="23:00">11:00 PM</option>
-                          <option value="00:00">12:00 AM</option>
-                          <option value="01:00">1:00 AM</option>
-                          <option value="02:00">2:00 AM</option>
-                        </select>
-                      </div>
-                    </label>
-                  </div>
-                ))}
-              </div>
+              <label className="field">
+                <span className="field-label">Working Hours</span>
+                <select
+                  name="workingHours"
+                  value={JSON.stringify(formValues.workingHours)}
+                  onChange={handleWorkingHoursChange}
+                  className="field-input time-select"
+                >
+                  <option value="">Select Working Hours</option>
+                  <option value='{"monday":{"open":"09:00","close":"17:00","closed":false},"tuesday":{"open":"09:00","close":"17:00","closed":false},"wednesday":{"open":"09:00","close":"17:00","closed":false},"thursday":{"open":"09:00","close":"17:00","closed":false},"friday":{"open":"09:00","close":"17:00","closed":false},"saturday":{"open":"10:00","close":"14:00","closed":false},"sunday":{"open":"10:00","close":"14:00","closed":false}}'>
+                    Monday - Friday: 9AM-5PM, Saturday - Sunday: 10AM-2PM
+                  </option>
+                  <option value='{"monday":{"open":"08:00","close":"18:00","closed":false},"tuesday":{"open":"08:00","close":"18:00","closed":false},"wednesday":{"open":"08:00","close":"18:00","closed":false},"thursday":{"open":"08:00","close":"18:00","closed":false},"friday":{"open":"08:00","close":"18:00","closed":false},"saturday":{"open":"09:00","close":"16:00","closed":false},"sunday":{"open":"09:00","close":"16:00","closed":false}}'>
+                    Monday - Friday: 8AM-6PM, Saturday - Sunday: 9AM-4PM
+                  </option>
+                  <option value='{"monday":{"open":"07:00","close":"19:00","closed":false},"tuesday":{"open":"07:00","close":"19:00","closed":false},"wednesday":{"open":"07:00","close":"19:00","closed":false},"thursday":{"open":"07:00","close":"19:00","closed":false},"friday":{"open":"07:00","close":"19:00","closed":false},"saturday":{"open":"08:00","close":"17:00","closed":false},"sunday":{"open":"08:00","close":"17:00","closed":false}}'>
+                    Monday - Friday: 7AM-7PM, Saturday - Sunday: 8AM-5PM
+                  </option>
+                  <option value='{"monday":{"open":"06:00","close":"22:00","closed":false},"tuesday":{"open":"06:00","close":"22:00","closed":false},"wednesday":{"open":"06:00","close":"22:00","closed":false},"thursday":{"open":"06:00","close":"22:00","closed":false},"friday":{"open":"06:00","close":"22:00","closed":false},"saturday":{"open":"07:00","close":"21:00","closed":false},"sunday":{"open":"07:00","close":"21:00","closed":false}}'>
+                    Monday - Friday: 6AM-10PM, Saturday - Sunday: 7AM-9PM
+                  </option>
+                  <option value='{"monday":{"open":"09:00","close":"17:00","closed":false},"tuesday":{"open":"09:00","close":"17:00","closed":false},"wednesday":{"open":"09:00","close":"17:00","closed":false},"thursday":{"open":"09:00","close":"17:00","closed":false},"friday":{"open":"09:00","close":"17:00","closed":false},"saturday":{"closed":true},"sunday":{"closed":true}}'>
+                    Monday - Friday: 9AM-5PM, Saturday - Sunday: Closed
+                  </option>
+                  <option value='{"monday":{"closed":true},"tuesday":{"closed":true},"wednesday":{"closed":true},"thursday":{"closed":true},"friday":{"closed":true},"saturday":{"closed":true},"sunday":{"closed":true}}'>
+                    Closed All Days
+                  </option>
+                </select>
+              </label>
             </div>
 
             <button type="submit" className="btn btn-primary btn-block" disabled={saving}>

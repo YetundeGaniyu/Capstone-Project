@@ -3,8 +3,9 @@ import { useNavigate } from 'react-router-dom'
 
 export function AdminAccess() {
   const [credentials, setCredentials] = useState({
-    username: '',
-    password: ''
+    email: '',
+    password: '',
+    adminKey: ''
   })
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
@@ -15,8 +16,8 @@ export function AdminAccess() {
     
     console.log('Admin login attempt:', credentials)
     
-    if (!credentials.username || !credentials.password) {
-      setError('Please enter both username and password')
+    if (!credentials.email || !credentials.password || !credentials.adminKey) {
+      setError('Please enter email, password, and admin key')
       return
     }
 
@@ -26,16 +27,19 @@ export function AdminAccess() {
     try {
       // Admin credentials
       const ADMIN_CREDENTIALS = {
-        username: 'admin@smeconnect.com',
-        password: 'Admin@2024!Secure'
+        email: 'admin@smeconnect.com',
+        password: 'Admin@2024!Secure',
+        adminKey: 'ADMIN-2024-KEY'
       }
       
       console.log('Expected credentials:', ADMIN_CREDENTIALS)
-      console.log('Username match:', credentials.username === ADMIN_CREDENTIALS.username)
+      console.log('Email match:', credentials.email === ADMIN_CREDENTIALS.email)
       console.log('Password match:', credentials.password === ADMIN_CREDENTIALS.password)
+      console.log('Admin key match:', credentials.adminKey === ADMIN_CREDENTIALS.adminKey)
       
-      if (credentials.username === ADMIN_CREDENTIALS.username && 
-          credentials.password === ADMIN_CREDENTIALS.password) {
+      if (credentials.email === ADMIN_CREDENTIALS.email && 
+          credentials.password === ADMIN_CREDENTIALS.password &&
+          credentials.adminKey === ADMIN_CREDENTIALS.adminKey) {
         
         console.log('Authentication successful!')
         
@@ -84,24 +88,24 @@ export function AdminAccess() {
             
             <form className="form" onSubmit={handleSubmit}>
               <div className="form-group">
-                <label htmlFor="username" className="form-label">
-                  Admin Username
+                <label htmlFor="email" className="form-label">
+                  Email
                 </label>
                 <input
-                  type="text"
-                  id="username"
-                  name="username"
-                  value={credentials.username}
+                  type="email"
+                  id="email"
+                  name="email"
+                  value={credentials.email}
                   onChange={handleInputChange}
                   className="form-input"
-                  placeholder="Enter admin username"
+                  placeholder="Enter admin email"
                   required
                 />
               </div>
 
               <div className="form-group">
                 <label htmlFor="password" className="form-label">
-                  Admin Password
+                  Password
                 </label>
                 <input
                   type="password"
@@ -111,6 +115,22 @@ export function AdminAccess() {
                   onChange={handleInputChange}
                   className="form-input"
                   placeholder="Enter admin password"
+                  required
+                />
+              </div>
+
+              <div className="form-group">
+                <label htmlFor="adminKey" className="form-label">
+                  Admin Key
+                </label>
+                <input
+                  type="text"
+                  id="adminKey"
+                  name="adminKey"
+                  value={credentials.adminKey}
+                  onChange={handleInputChange}
+                  className="form-input"
+                  placeholder="Enter admin key"
                   required
                 />
               </div>
@@ -135,21 +155,6 @@ export function AdminAccess() {
               <a href="/login" className="link">User Login</a>
             </div>
 
-            <div className="admin-test-section">
-              <button 
-                onClick={() => {
-                  const testCreds = {
-                    username: 'admin@smeconnect.com',
-                    password: 'Admin@2024!Secure'
-                  }
-                  setCredentials(testCreds)
-                  console.log('Test credentials filled:', testCreds)
-                }}
-                className="btn btn-secondary btn-sm"
-              >
-                Fill Test Credentials
-              </button>
-            </div>
           </div>
         </div>
       </div>
