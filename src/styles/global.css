@@ -344,7 +344,7 @@ input {
   font-size: 0.9rem;
   padding: 0.4rem 0.7rem;
   border-radius: 999px;
-  color: var(--color-text-muted);
+  color: var(--color-text);
 }
 
 .nav-link.active {
