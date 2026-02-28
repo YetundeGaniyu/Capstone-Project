@@ -4,7 +4,7 @@ import { useAuth } from '../context/AuthContext'
 import { sendOTPCode, generateOTPCode } from '../services/emailService'
 
 export function OTPVerification() {
-  const { currentUser } = useAuth()
+  const { currentUser: _currentUser } = useAuth()
   const navigate = useNavigate()
   const location = useLocation()
   const [otpCode, setOtpCode] = useState('')
@@ -32,6 +32,7 @@ export function OTPVerification() {
       // Navigate to the appropriate page based on user role
       navigate('/dashboard')
     } catch (error) {
+      console.error('OTP verification error:', error)
       setError('Invalid OTP code. Please try again.')
     } finally {
       setLoading(false)
@@ -50,6 +51,7 @@ export function OTPVerification() {
       // In a real app, you'd store this code securely
       console.log('New OTP code:', code)
     } catch (error) {
+      console.error('OTP resend error:', error)
       setError('Failed to resend OTP code')
     } finally {
       setResending(false)

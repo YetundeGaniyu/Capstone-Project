@@ -42,6 +42,7 @@ export function AdminGateway() {
         setError('Invalid admin credentials')
       }
     } catch (err) {
+      console.error('Admin login error:', err)
       setError('Login failed. Please try again.')
     } finally {
       setLoading(false)
