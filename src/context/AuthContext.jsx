@@ -65,8 +65,17 @@ export function AuthProvider({ children }) {
   // Sign in with Google and set role
   async function signInWithGoogle(role = null) {
     try {
+      console.log('Starting Google sign-in with role:', role)
+      
+      // Check if Firebase is properly initialized
+      if (!auth || !googleProvider) {
+        throw new Error('Firebase not properly initialized')
+      }
+      
       const result = await signInWithPopup(auth, googleProvider)
       const user = result.user
+      
+      console.log('Google sign-in successful, user:', user.email)
 
       // Save Google account for subsequent logins
       saveGoogleAccount(user)
@@ -95,11 +104,13 @@ export function AuthProvider({ children }) {
         }
         
         await setDoc(userDocRef, userData)
+        console.log('Created new user document with role:', role)
       } else {
         // User exists, check if they have a role
         const data = userDoc.data()
         if (data.role) {
           setUserRole(data.role)
+          console.log('Existing user role:', data.role)
         } else if (role) {
           // Update existing user with role if provided
           const updateData = { role }
@@ -111,13 +122,30 @@ export function AuthProvider({ children }) {
           
           await setDoc(userDocRef, updateData, { merge: true })
           setUserRole(role)
+          console.log('Updated existing user with role:', role)
         }
       }
 
       return user
     } catch (error) {
       console.error('Error signing in with Google:', error)
-      throw error
+      
+      // Provide more specific error messages
+      let errorMessage = 'Failed to sign in. Please try again.'
+      
+      if (error.code === 'auth/popup-closed-by-user') {
+        errorMessage = 'Sign-in popup was closed. Please try again.'
+      } else if (error.code === 'auth/popup-blocked') {
+        errorMessage = 'Pop-up was blocked by your browser. Please allow pop-ups and try again.'
+      } else if (error.code === 'auth/unauthorized-domain') {
+        errorMessage = 'This domain is not authorized for Google sign-in. Please check your Firebase configuration.'
+      } else if (error.code === 'auth/api-key-not-allowed') {
+        errorMessage = 'API key is not allowed. Please check your Firebase configuration.'
+      } else if (error.message.includes('Firebase not properly initialized')) {
+        errorMessage = 'Firebase is not properly configured. Please check your environment variables.'
+      }
+      
+      throw new Error(errorMessage)
     }
   }
 

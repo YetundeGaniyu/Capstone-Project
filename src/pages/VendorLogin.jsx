@@ -140,10 +140,10 @@ setLoading(true)
   return (
     <section className="page page-vendor-login">
       <div className="page-width">
-        <div className="card auth-card">
-          <h1 className="page-title">Login</h1>
+        <div className="card auth-card vendor-login-simple">
+          <h1 className="page-title">Vendor Login</h1>
           <p className="page-subtitle">
-            Sign in to manage your business profile and connect with customers
+            Sign in to manage your business profile
           </p>
 
           {successMessage && (

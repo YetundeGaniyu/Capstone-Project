@@ -16,6 +16,7 @@ import { Dashboard } from './pages/Dashboard.jsx'
 import { VendorProfile } from './pages/VendorProfile.jsx'
 import { Layout } from './components/Layout.jsx'
 import { ProtectedRoute } from './components/ProtectedRoute.jsx'
+import { VendorPasswordStep } from './components/VendorPasswordStep.jsx'
 import { VendorForm } from './components/VendorForm.jsx'
 import { VendorList } from './components/VendorList.jsx'
 import { VendorOnboarding } from './pages/VendorOnboarding.jsx'
@@ -37,6 +38,7 @@ function App() {
             <Route path="/signup/user" element={<UserSignUp />} />
             <Route path="/signup/vendor" element={<VendorSignUp />} />
             <Route path="/vendor/create" element={<VendorForm />} />
+            <Route path="/vendor/password" element={<VendorPasswordStep />} />
             <Route path="/role-selection" element={<RoleSelection />} />
             <Route
               path="/admin/dashboard"

@@ -47,6 +47,7 @@ export function UserSignUp() {
             disabled={loading}
             className="btn btn-google btn-block"
           >
+            <span className="google-icon"></span>
             {loading ? "Signing up..." : "Sign up with Google"}
           </button>
 

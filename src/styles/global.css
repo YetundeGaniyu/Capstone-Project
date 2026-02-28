@@ -96,6 +96,212 @@ body::before {
   gap: var(--space-sm);
 }
 
+/* Simplified Vendor Login */
+.vendor-login-simple {
+  background: #ffffff !important;
+  border: 1px solid var(--color-border-subtle);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+}
+
+.vendor-login-simple .page-title {
+  font-size: 1.5rem;
+  margin-bottom: var(--space-sm);
+}
+
+.vendor-login-simple .page-subtitle {
+  font-size: 0.9rem;
+  color: var(--color-text-muted);
+  margin-bottom: var(--space-lg);
+}
+
+.vendor-login-simple .form-input {
+  padding: 0.75rem;
+  font-size: 0.9rem;
+  border: 1px solid var(--color-border-subtle);
+  border-radius: var(--radius-md);
+}
+
+.vendor-login-simple .btn-vendor-login {
+  padding: 0.75rem;
+  font-size: 0.9rem;
+}
+
+.vendor-login-simple .field-label {
+  font-size: 0.85rem;
+  margin-bottom: 0.5rem;
+}
+
+/* Success Message Styling */
+.success-message {
+  background-color: #10b981;
+  color: white;
+  padding: 0.75rem;
+  border-radius: var(--radius-md);
+  margin-bottom: var(--space-md);
+  text-align: center;
+  font-weight: 500;
+}
+
+.error-message {
+  background-color: #ef4444;
+  color: white;
+  padding: 0.75rem;
+  border-radius: var(--radius-md);
+  margin-bottom: var(--space-md);
+  text-align: center;
+  font-weight: 500;
+}
+
+.message {
+  padding: 0.75rem;
+  border-radius: var(--radius-md);
+  margin-bottom: var(--space-md);
+  text-align: center;
+  font-weight: 500;
+}
+
+/* Password Input Container */
+.password-input-container {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.password-input-container .field-input {
+  padding-right: 3rem;
+  width: 100%;
+}
+
+.password-toggle {
+  position: absolute;
+  right: 0.75rem;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 1.2rem;
+  padding: 0.25rem;
+  border-radius: 4px;
+  transition: background-color 0.2s ease;
+}
+
+.password-toggle:hover {
+  background-color: var(--color-border-subtle);
+}
+
+.form-actions {
+  display: flex;
+  gap: var(--space-md);
+  margin-top: var(--space-lg);
+}
+
+.form-actions .btn {
+  flex: 1;
+}
+
+.page-vendor-password .card {
+  max-width: 400px;
+  margin: 0 auto;
+  padding: var(--space-lg);
+}
+
+.page-vendor-password .field {
+  margin-bottom: 1rem;
+}
+
+.page-vendor-password .field-label {
+  font-size: 0.85rem;
+  margin-bottom: 0.5rem;
+}
+
+.page-vendor-password .field-input {
+  padding: 0.75rem;
+  font-size: 0.9rem;
+}
+
+.page-vendor-password .btn {
+  padding: 0.75rem;
+  font-size: 0.9rem;
+}
+
+.vendor-login-header {
+  text-align: center;
+  margin-bottom: var(--space-xl);
+  position: relative;
+  font-weight: 500 ;
+}
+
+.vendor-login-icon {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-warm) 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto var(--space-md);
+  box-shadow: 0 8px 24px rgba(175, 119, 7, 0.3);
+}
+
+.vendor-icon {
+  font-size: 1.8rem;
+  filter: brightness(1.2);
+}
+
+.vendor-login-card {
+  background: linear-gradient(135deg, #ffffff 0%, #faf9fc 100%);
+  border: 1px solid var(--color-border-subtle);
+  box-shadow: 0 20px 50px rgba(175, 119, 7, 0.15), 0 8px 20px rgba(26, 22, 37, 0.08);
+  position: relative;
+  overflow: hidden;
+}
+
+.vendor-login-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(90deg, var(--color-primary) 0%, var(--color-warm) 100%);
+}
+
+.page-vendor-login .form-input {
+  border: 2px solid var(--color-border-subtle);
+  background: rgba(255, 255, 255, 0.95);
+  transition: all 0.3s ease;
+  border-radius: var(--radius-md);
+  padding: 1rem;
+  font-size: 1rem;
+}
+
+.page-vendor-login .form-input:focus {
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px rgba(175, 119, 7, 0.15);
+  background: #ffffff;
+}
+
+.page-vendor-login .btn-vendor-login {
+  background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-warm) 100%);
+  color: #ffffff;
+  border: none;
+  padding: 1rem var(--space-lg);
+  border-radius: var(--radius-md);
+  font-weight: 600;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 8px 24px rgba(175, 119, 7, 0.35);
+}
+
+.page-vendor-login .btn-vendor-login:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 32px rgba(175, 119, 7, 0.45);
+}
+
+.page-vendor-login .btn-vendor-login:active {
+  transform: translateY(0);
+}
+
 .vendor-info {
   background: var(--color-primary-soft);
   padding: var(--space-md);
@@ -111,6 +317,62 @@ body::before {
 
 .vendor-info strong {
   color: var(--color-primary);
+}
+
+/* Vendor Form Styling */
+.page-vendor-create .card {
+  background: linear-gradient(135deg, #ffffff 0%, #faf9fc 100%);
+  border: 1px solid var(--color-border-subtle);
+  box-shadow: 0 20px 50px rgba(175, 119, 7, 0.1), 0 8px 20px rgba(26, 22, 37, 0.05);
+  position: relative;
+  overflow: hidden;
+}
+
+.page-vendor-create .card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(90deg, var(--color-primary) 0%, var(--color-warm) 100%);
+}
+
+.page-vendor-create .field-input {
+  border: 2px solid var(--color-border-subtle);
+  background: rgba(255, 255, 255, 0.95);
+  transition: all 0.3s ease;
+  border-radius: var(--radius-md);
+  padding: 0.875rem 1rem;
+  font-size: 0.95rem;
+}
+
+.page-vendor-create .field-input:focus {
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px rgba(175, 119, 7, 0.15);
+  background: #ffffff;
+}
+
+.page-vendor-create .btn-primary {
+  background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-warm) 100%);
+  color: #ffffff;
+  border: none;
+  padding: 1rem var(--space-lg);
+  border-radius: var(--radius-md);
+  font-weight: 600;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 8px 24px rgba(175, 119, 7, 0.35);
+}
+
+.page-vendor-create .btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 32px rgba(175, 119, 7, 0.45);
+}
+
+.page-vendor-create .btn-primary:active {
+  transform: translateY(0);
 }
 
 .working-hours-section {
@@ -689,15 +951,15 @@ input {
 
 .card {
   padding: var(--space-lg);
-  border-radius: var(--radius-lg);
+  border-radius: 5px;
   background: var(--color-surface);
-  border: 1px solid var(--color-border-subtle);
+  border: 1p x solid var(--color-border-subtle);
   box-shadow: var(--shadow-card);
 }
 
 .page-title {
   margin: 0 0 0.4rem;
-  font-size: 1.45rem;
+  font-size: 1.1rem;
   font-weight: 700;
   letter-spacing: -0.02em;
   color: #000000;
@@ -705,9 +967,9 @@ input {
 
 .page-subtitle {
   margin: 0 0 var(--space-lg);
-  font-size: 0.95rem;
+  font-size: 0.75rem;
   color: #000000;
-  font-weight: 500;
+  font-weight: 300;
 }
 
 .page-header {

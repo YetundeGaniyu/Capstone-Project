@@ -1,7 +1,5 @@
 import { useState, useEffect } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
-import { doc, setDoc } from 'firebase/firestore'
-import { db } from '../services/firebase'
 
 const CATEGORIES = [
   'Logistics',
@@ -34,8 +32,6 @@ export function VendorForm() {
     phone: '',
     whatsapp: '',
     address: '',
-    password: '',
-    confirmPassword: '',
     workingHours: {
       monday: { open: '', close: '', closed: false },
       tuesday: { open: '', close: '', closed: false },
@@ -64,6 +60,24 @@ export function VendorForm() {
         latitude: prefilled.latitude ?? prev.latitude,
         longitude: prefilled.longitude ?? prev.longitude,
       }))
+    }
+
+    // Check if returning from password step with saved data
+    const savedData = sessionStorage.getItem('vendorData')
+    if (savedData && !prefilled) {
+      try {
+        const parsedData = JSON.parse(savedData)
+        if (parsedData.passwordData) {
+          // If coming back from password step, restore the form data
+          const { passwordData: _passwordData, ...formData } = parsedData
+          setFormValues(prev => ({
+            ...prev,
+            ...formData
+          }))
+        }
+      } catch (error) {
+        console.error('Error parsing saved vendor data:', error)
+      }
     }
   }, [prefilled])
 
@@ -121,34 +135,7 @@ export function VendorForm() {
     if (!formValues.description.trim()) newErrors.description = 'Description is required'
     if (!formValues.phone.trim()) newErrors.phone = 'Phone number is required'
     if (!formValues.address.trim()) newErrors.address = 'Address is required'
-    if (!formValues.password) newErrors.password = 'Password is required'
-    if (formValues.password.length < 6) newErrors.password = 'Password must be at least 6 characters'
-    if (!formValues.confirmPassword) newErrors.confirmPassword = 'Please confirm your password'
-    if (formValues.password !== formValues.confirmPassword) newErrors.confirmPassword = 'Passwords do not match'
     return newErrors
-  }
-
-  const generateVendorId = () => {
-    return `VND_${Date.now()}_${Math.random().toString(36).substr(2, 9).toUpperCase()}`
-  }
-
-  const generateOTP = () => {
-    return Math.floor(100000 + Math.random() * 900000).toString()
-  }
-
-  const sendEmailConfirmation = async (vendorData, otp) => {
-    // This would integrate with an email service like SendGrid, Firebase Functions, etc.
-    // For now, we'll simulate the email sending
-    console.log('Email confirmation sent to:', vendorData.email)
-    console.log('Verification link:', `https://smeconnect.com/verify/${vendorData.vendorId}`)
-    console.log('OTP:', otp)
-    
-    // In a real implementation, you would:
-    // 1. Send email with verification link and OTP
-    // 2. Store OTP and expiration in database
-    // 3. Set expiration time (24 hours)
-    
-    return true
   }
 
   const handleSubmit = async (event) => {
@@ -163,12 +150,8 @@ export function VendorForm() {
     setSavedMessage('')
 
     try {
-      const vendorId = generateVendorId()
-      const otp = generateOTP()
-      const expirationTime = new Date(Date.now() + 24 * 60 * 60 * 1000) // 24 hours from now
-      
+      // Save form data to sessionStorage for next step
       const vendorData = {
-        vendorId,
         fullName: formValues.fullName.trim(),
         businessName: formValues.businessName.trim(),
         category: formValues.category,
@@ -176,35 +159,17 @@ export function VendorForm() {
         phone: formValues.phone.trim(),
         whatsapp: formValues.whatsapp.trim(),
         address: formValues.address.trim(),
-        password: formValues.password, // In production, this should be hashed
         workingHours: formValues.workingHours,
         email: formValues.email.trim(),
-        createdAt: new Date().toISOString(),
-        status: 'pending_verification',
-        emailVerified: false,
-        otpVerified: false,
-        otp: otp,
-        otpExpiration: expirationTime.toISOString(),
-        verificationLinkExpiration: expirationTime.toISOString(),
       }
 
-      // Store vendor data in Firestore
-      const vendorRef = doc(db, 'vendors', vendorId)
-      await setDoc(vendorRef, vendorData)
+      sessionStorage.setItem('vendorData', JSON.stringify(vendorData))
 
-      // Send email confirmation with OTP
-      await sendEmailConfirmation(vendorData, otp)
-
-      setSavedMessage('Vendor profile created! Please check your email for verification link and OTP.')
-      
-      // Redirect to vendor login after successful registration
-      setTimeout(() => {
-        navigate('/login/vendor')
-      }, 3000)
-      
+      // Navigate to password step
+      navigate('/vendor/password')
     } catch (error) {
-      console.error('Error creating vendor profile:', error)
-      setSavedMessage('Something went wrong while creating your profile. Please try again.')
+      console.error('Error saving vendor data:', error)
+      setErrors({ submit: 'Failed to save data. Please try again.' })
     } finally {
       setSaving(false)
     }
@@ -316,32 +281,6 @@ export function VendorForm() {
               {errors.address && <span className="field-error">{errors.address}</span>}
             </label>
 
-            <label className="field">
-              <span className="field-label">Password</span>
-              <input
-                className="field-input"
-                name="password"
-                type="password"
-                value={formValues.password}
-                onChange={handleChange}
-                placeholder="Create a secure password"
-              />
-              {errors.password && <span className="field-error">{errors.password}</span>}
-            </label>
-
-            <label className="field">
-              <span className="field-label">Confirm Password</span>
-              <input
-                className="field-input"
-                name="confirmPassword"
-                type="password"
-                value={formValues.confirmPassword}
-                onChange={handleChange}
-                placeholder="Confirm your password"
-              />
-              {errors.confirmPassword && <span className="field-error">{errors.confirmPassword}</span>}
-            </label>
-
             <div className="working-hours-section">
               <label className="field">
                 <span className="field-label">Working Hours</span>
@@ -375,10 +314,15 @@ export function VendorForm() {
             </div>
 
             <button type="submit" className="btn btn-primary btn-block" disabled={saving}>
-              {saving ? 'Creating Profile...' : 'Create Vendor Profile'}
+              {saving ? 'Saving...' : 'Continue'}
             </button>
 
             {savedMessage && <p className="field-help">{savedMessage}</p>}
+
+            <div className="auth-footer">
+              <p>Already have an account?</p>
+              <a href="/login/vendor" className="link">Sign in</a>
+            </div>
           </form>
         </div>
       </div>
