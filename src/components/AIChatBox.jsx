@@ -31,7 +31,10 @@ export function AIChatBox() {
           .filter((v) => !v.blacklisted)
         setVendors(list)
       } catch (err) {
-        if (!cancelled) setError('Could not load vendors')
+        if (!cancelled) {
+          console.error('Error loading vendors:', err)
+          setError('Could not load vendors')
+        }
       }
     }
     load()
