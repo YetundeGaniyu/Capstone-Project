@@ -71,7 +71,7 @@ export function Layout({ children }) {
       <footer className="app-footer">
         <div className="footer-inner">
           <p className="footer-text">
-            © {new Date().getFullYear()} Ask Yellow... Connecting SMEs with customers
+            © {new Date().getFullYear()} Ask Yello... Connecting SMEs with customers
           </p>
         </div>
       </footer>

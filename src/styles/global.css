@@ -4,7 +4,7 @@
   --color-border-subtle: #eae8f0;
   --color-text: #1d1b1a;
   --color-text-muted: #6f3506;
-  --color-primary: #6366f1;
+  --color-primary: #af7707;
   --color-primary-soft: #e0e7ff;
   --color-accent: #0d9488;
   --color-accent-soft: #ccfbf1;
@@ -232,7 +232,7 @@ body::before {
   font-size: 0.9rem;
   cursor: pointer;
   transition: all 0.2s ease;
-  box-shadow: 0 4px 12px rgba(190, 18, 60, 0.35);
+  box-shadow: 0 4px 12px rgba(190, 113, 18, 0.35);
 }
 
 .btn-admin:hover {
@@ -578,8 +578,9 @@ input {
 
 .hero-subtitle {
   margin: 0 0 var(--space-md);
-  color: var(--color-text-muted);
-  font-size: 0.98rem;
+  color: var(--color-text);
+  font-size: 0.95rem;
+  font-weight: 600;
 }
 
 .hero-actions {

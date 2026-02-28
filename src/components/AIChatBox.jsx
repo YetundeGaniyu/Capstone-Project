@@ -94,7 +94,7 @@ export function AIChatBox() {
       {open && (
         <div className="ai-chat-panel" ref={panelRef}>
           <div className="ai-chat-panel-header">
-            <span className="ai-chat-panel-title">Ask Yellow</span>
+            <span className="ai-chat-panel-title">Ask Yello</span>
             <span className="ai-chat-panel-subtitle">What Can I Help With? </span>
           </div>
           <div className="ai-chat-messages">
