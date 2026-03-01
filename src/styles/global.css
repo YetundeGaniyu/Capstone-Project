@@ -101,34 +101,85 @@ body::before {
   background: #ffffff !important;
   border: 1px solid var(--color-border-subtle);
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+  min-height: 420px;
+  padding: var(--space-xl) !important;
+  max-width: 380px !important;
 }
 
 .vendor-login-simple .page-title {
-  font-size: 1.5rem;
+  font-size: 1.3rem;
   margin-bottom: var(--space-sm);
+  color: #000000;
+  text-align: left;
 }
 
 .vendor-login-simple .page-subtitle {
-  font-size: 0.9rem;
-  color: var(--color-text-muted);
+  font-size: 0.85rem;
+  color: #000000;
   margin-bottom: var(--space-lg);
+  text-align: left;
 }
 
-.vendor-login-simple .form-input {
-  padding: 0.75rem;
-  font-size: 0.9rem;
-  border: 1px solid var(--color-border-subtle);
-  border-radius: var(--radius-md);
-}
-
-.vendor-login-simple .btn-vendor-login {
-  padding: 0.75rem;
-  font-size: 0.9rem;
+.vendor-login-simple .form-group {
+  margin-bottom: 1rem !important;
+  width: 100%;
+  text-align: left;
 }
 
 .vendor-login-simple .field-label {
-  font-size: 0.85rem;
-  margin-bottom: 0.5rem;
+  font-size: 0.7rem !important;
+  margin-bottom: 0.5rem !important;
+  color: #000000 !important;
+  font-weight: 500 !important;
+  display: block;
+  text-align: left;
+  text-transform: none;
+  letter-spacing: normal;
+}
+
+.vendor-login-simple .form-input {
+  padding: 0.75rem !important;
+  font-size: 0.875rem !important;
+  border: 1px solid #d1d5db !important;
+  border-radius: 6px !important;
+  color: #000000 !important;
+  background: #ffffff !important;
+  width: 120%;
+  display: block;
+  box-sizing: border-box;
+  transition: all 0.2s ease !important;
+  outline: none;
+  text-align: left;
+}
+
+.vendor-login-simple .form-input:focus {
+  border-color: #d97706 !important;
+  box-shadow: 0 0 0 2px rgba(217, 119, 6, 0.2) !important;
+}
+
+.vendor-login-simple .form-input::placeholder {
+  color: #6b7280 !important;
+  opacity: 1;
+  font-weight: 400;
+}
+
+.vendor-login-simple .btn-vendor-login {
+  padding: 0.5rem 1rem !important;
+  font-size: 0.85rem !important;
+  width: 60% !important;
+  margin-top: 0.5rem;
+  border-radius: 12px !important;
+  text-align: center !important;
+  display: block;
+}
+
+.vendor-login-simple .auth-divider {
+  width: 100% !important;
+  height: 1px !important;
+  background: #e5e7eb !important;
+  margin: 1.5rem 0 !important;
+  display: block !important;
+  border: none !important;
 }
 
 /* Success Message Styling */
@@ -1783,22 +1834,22 @@ input {
 
 /* Vendor Login Button Styling */
 .btn-vendor-login {
-  background: linear-gradient(135deg, #d97706 0%, #b45309 100%) !important;
-  color: #ffffff !important;
+  background: #e19405  !important;
+  color: #151414 !important;
   border: none !important;
   padding: 0.75rem 1rem !important;
-  border-radius: 12px !important;
+  border-radius: 20px;
   font-size: 0.9rem !important;
-  font-weight: 600 !important;
+  font-weight: 700 !important;
   cursor: pointer !important;
   transition: all 0.2s ease !important;
-  box-shadow: 0 4px 14px rgba(217, 119, 6, 0.3) !important;
+  box-shadow: 0 4px 14px rgba(239, 187, 16, 0.3) !important;
 }
 
 .btn-vendor-login:hover {
   transform: translateY(-1px) !important;
-  box-shadow: 0 6px 20px rgba(217, 119, 6, 0.4) !important;
-  background: linear-gradient(135deg, #b45309 0%, #92400e 100%) !important;
+  box-shadow: 0 6px 20px rgba(238, 237, 234, 0.4) !important;
+  background: linear-gradient(135deg, #deab03 0%, #e6b309 100%) !important;
 }
 
 .btn-vendor-login:active {
@@ -1814,22 +1865,22 @@ input {
 
 /* Vendor Login Page Specific Styles */
 .page-vendor-login .auth-card {
-  max-width: 450px;
+  max-width: 380px;
   padding: var(--space-xl);
   border-radius: 8px !important;
   background: #ffffff !important;
-  box-shadow:
-    0 8px 32px rgba(0, 0, 0, 0.1),
-    0 2px 8px rgba(0, 0, 0, 0.05) !important;
   border: 1px solid #e5e7eb !important;
+  min-height: 420px;
 }
 
 .page-vendor-login .auth-card .page-title {
-  font-weight: 500 !important;
+  font-weight: 700 !important;
+  font-size: 1.1rem;
 }
 
 .page-vendor-login .auth-card .page-subtitle {
-  font-weight: 400 !important;
+  font-weight: 300 !important;
+  font-size: 0.80rem;
 }
 
 .auth-divider {
@@ -1907,17 +1958,17 @@ input {
 
 .page-vendor-login .field-label {
   color: #000000 !important;
-  font-weight: 600 !important;
-  margin-bottom: 0.75rem !important;
-  font-size: 0.875rem !important;
+  font-weight: 500 !important;
+  margin-bottom: 0.4rem !important;
+  font-size: 0.7rem !important;
   letter-spacing: 0.025em !important;
   text-transform: uppercase !important;
 }
 
 .page-vendor-login .field-input {
-  padding: 1rem !important;
-  margin-bottom: 1rem !important;
-  font-size: 1rem !important;
+  padding: 0.6rem !important;
+  margin-bottom: 0.8rem !important;
+  font-size: 0.8rem !important;
   color: #000000 !important;
   font-weight: 500 !important;
   background: rgba(255, 255, 255, 0.9) !important;
@@ -1937,19 +1988,18 @@ input {
 }
 
 .page-vendor-login .field-input::placeholder {
-  color: #9ca3af !important;
+  color: #000000 !important;
   font-weight: 400 !important;
+  opacity: 0.6;
 }
 
-.page-vendor-login .page-title {
-  color: #000000;
-  margin-bottom: 0.75rem;
-}
-
-.page-vendor-login .page-subtitle {
-  color: #000000;
-  font-weight: 500;
-  margin-bottom: 1.5rem;
+.page-vendor-login .field-label {
+  color: #000000 !important;
+  font-weight: 500 !important;
+  margin-bottom: 0.5rem !important;
+  font-size: 0.75rem !important;
+  letter-spacing: 0.025em !important;
+  text-transform: uppercase !important;
 }
 
 /* Vendor Profile Creation Form Specific Styles */

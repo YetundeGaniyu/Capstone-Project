@@ -244,6 +244,8 @@ setLoading(true)
             </form>
           )}
 
+          <hr className="auth-divider" />
+
           <div className="auth-footer">
             <p>New Service provider?</p>
             <a href="/vendor/create" className="link">
