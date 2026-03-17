@@ -1,7 +1,6 @@
 import { useState, useEffect, useRef } from 'react'
 import { collection, getDocs, doc, setDoc } from 'firebase/firestore'
 import { db } from '../services/firebase'
-import { sendChat, parseBlacklistIds, stripBlacklistLine } from '../services/openai'
 
 export function AIChatBox() {
   const [open, setOpen] = useState(false)
@@ -13,7 +12,7 @@ export function AIChatBox() {
     },
   ])
   const [input, setInput] = useState('')
-  const [loading, setLoading] = useState(false  )
+  const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [pendingBlacklist, setPendingBlacklist] = useState([])
   const messagesEndRef = useRef(null)
@@ -45,6 +44,43 @@ export function AIChatBox() {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
   }, [messages])
 
+  const sendMessage = async (userMessage) => {
+    try {
+      const response = await fetch(
+        'https://askyello-backend.onrender.com/chatbot', 
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ 
+            message: userMessage,
+            vendors: vendors,
+            chatHistory: messages
+          })
+        }
+      )
+      const data = await response.json()
+      return data
+    } catch (error) {
+      console.error('Chatbot error:', error)
+      throw error
+    }
+  }
+
+  const parseBlacklistIds = (content) => {
+    if (!content || typeof content !== 'string') return []
+    const match = content.match(/BLACKLIST_IDS:\s*([^\n]+)/i)
+    if (!match) return []
+    return match[1]
+      .split(',')
+      .map((s) => s.trim())
+      .filter(Boolean)
+  }
+
+  const stripBlacklistLine = (content) => {
+    if (!content || typeof content !== 'string') return content
+    return content.replace(/\n*BLACKLIST_IDS:\s*[^\n]+\s*/gi, '').trim()
+  }
+
   const handleSend = async () => {
     const text = input.trim()
     if (!text || loading) return
@@ -53,14 +89,11 @@ export function AIChatBox() {
     const userMsg = { role: 'user', content: text }
     setMessages((m) => [...m, userMsg])
     setLoading(true)
-    const chatHistory = [...messages, userMsg].map((m) => ({
-      role: m.role,
-      content: m.content,
-    }))
+    
     try {
-      const raw = await sendChat(vendors, chatHistory)
-      const ids = parseBlacklistIds(raw)
-      const displayContent = stripBlacklistLine(raw)
+      const data = await sendMessage(text)
+      const ids = parseBlacklistIds(data.reply || data.message)
+      const displayContent = stripBlacklistLine(data.reply || data.message)
       setMessages((m) => [...m, { role: 'assistant', content: displayContent }])
       if (ids.length > 0) setPendingBlacklist(ids)
     } catch (err) {

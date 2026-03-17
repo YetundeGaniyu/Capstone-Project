@@ -184,13 +184,16 @@ body::before {
 
 /* Success Message Styling */
 .success-message {
-  background-color: #10b981;
-  color: white;
+  background-color: #10b981 !important;
+  color: white !important;
   padding: 0.75rem;
   border-radius: var(--radius-md);
   margin-bottom: var(--space-md);
   text-align: center;
   font-weight: 500;
+  display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
 }
 
 .error-message {
@@ -225,18 +228,22 @@ body::before {
 
 .password-toggle {
   position: absolute;
-  right: 0.75rem;
+  right: 0.5rem;
   background: none;
   border: none;
   cursor: pointer;
-  font-size: 1.2rem;
   padding: 0.25rem;
   border-radius: 4px;
   transition: background-color 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #6b7280;
 }
 
 .password-toggle:hover {
   background-color: var(--color-border-subtle);
+  color: #374151;
 }
 
 .form-actions {
@@ -256,22 +263,37 @@ body::before {
 }
 
 .page-vendor-password .field {
-  margin-bottom: 1rem;
+  margin-bottom: 0.8rem;
 }
 
 .page-vendor-password .field-label {
-  font-size: 0.85rem;
-  margin-bottom: 0.5rem;
+  font-size: 0.75rem;
+  margin-bottom: 0.4rem;
+  color: #000000;
+  font-weight: 500;
 }
 
 .page-vendor-password .field-input {
-  padding: 0.75rem;
-  font-size: 0.9rem;
+  padding: 0.6rem;
+  font-size: 0.8rem;
+  color: #000000;
+}
+
+.page-vendor-password .page-title {
+  font-size: 1.1rem;
+  color: #000000;
+  margin-bottom: 0.5rem;
+}
+
+.page-vendor-password .page-subtitle {
+  font-size: 0.8rem;
+  color: #000000;
+  margin-bottom: 1rem;
 }
 
 .page-vendor-password .btn {
-  padding: 0.75rem;
-  font-size: 0.9rem;
+  padding: 0.5rem 1rem;
+  font-size: 0.85rem;
 }
 
 .vendor-login-header {

@@ -12,7 +12,6 @@ export function VendorPasswordStep() {
   const [showPassword, setShowPassword] = useState(false)
   const [showConfirmPassword, setShowConfirmPassword] = useState(false)
   const [errors, setErrors] = useState({})
-  const [loading, setLoading] = useState(false)
   const [showSuccess, setShowSuccess] = useState(false)
 
   const vendorData = JSON.parse(sessionStorage.getItem('vendorData') || '{}')
@@ -22,8 +21,12 @@ export function VendorPasswordStep() {
     const storedData = JSON.parse(sessionStorage.getItem('vendorData') || '{}')
     const formDataFromStorage = storedData.passwordData || {}
     
+    // Only set form data if there's saved password data
     if (formDataFromStorage.password || formDataFromStorage.confirmPassword) {
-      setFormData(formDataFromStorage)
+      // Use setTimeout to avoid synchronous setState in effect
+      setTimeout(() => {
+        setFormData(formDataFromStorage)
+      }, 0)
     }
     
     // Clean up vendorData by removing passwordData
@@ -88,66 +91,58 @@ export function VendorPasswordStep() {
       return
     }
 
-    setLoading(true)
+    // Show immediate success feedback before any async operations
+    setShowSuccess(true)
+    setErrors({})
 
-    try {
-      const vendorId = generateVendorId()
-      const otp = generateOTP()
-      const expirationTime = new Date(Date.now() + 24 * 60 * 60 * 1000)
-      
-      const completeVendorData = {
-        ...vendorData,
-        vendorId,
-        password: formData.password,
-        createdAt: new Date().toISOString(),
-        status: 'pending_verification',
-        emailVerified: false,
-        otpVerified: false,
-        otp: otp,
-        otpExpiration: expirationTime.toISOString(),
-        verificationLinkExpiration: expirationTime.toISOString(),
-      }
-
-      console.log('Creating vendor profile...')
-
-      // Optimized database write - use setDoc with merge option for better performance
-      const vendorRef = doc(db, 'vendors', vendorId)
-      await setDoc(vendorRef, completeVendorData, { merge: false })
-
-      console.log('Vendor profile created successfully')
-
-      // Show immediate success feedback
-      const successMessage = 'Profile created successfully! Please check your email to confirm your account.'
-      
-      // Update UI with success message immediately
-      setErrors({ submit: 'success' })
-      setShowSuccess(true)
-      
-      // Show success alert
-      alert(successMessage)
-
-      // Send email confirmation asynchronously (non-blocking)
-      sendEmailConfirmation(completeVendorData, otp).catch(console.error)
-
-      // Clear sessionStorage
-      sessionStorage.removeItem('vendorData')
-      
-      // Navigate after a short delay to allow user to see the success message
-      setTimeout(() => {
-        navigate('/login/vendor', {
-          state: {
-            message: 'Profile created! Please check your email for verification link and OTP.'
-          }
-        })
-      }, 500) // Reduced delay for faster response
-      
-    } catch (error) {
-      console.error('Error creating vendor profile:', error)
-      setErrors({ submit: 'Failed to create profile. Please try again.' })
-      alert('Failed to create profile. Please try again.')
-    } finally {
-      setLoading(false)
+    // Generate data
+    const vendorId = generateVendorId()
+    const otp = generateOTP()
+    const expirationTime = new Date(Date.now() + 24 * 60 * 60 * 1000)
+    
+    const completeVendorData = {
+      ...vendorData,
+      vendorId,
+      password: formData.password,
+      createdAt: new Date().toISOString(),
+      status: 'pending_verification',
+      emailVerified: false,
+      otpVerified: false,
+      otp: otp,
+      otpExpiration: expirationTime.toISOString(),
+      verificationLinkExpiration: expirationTime.toISOString(),
     }
+
+    console.log('Creating vendor profile...')
+
+    // Perform database operations in background without blocking UI
+    Promise.resolve()
+      .then(async () => {
+        const vendorRef = doc(db, 'vendors', vendorId)
+        await setDoc(vendorRef, completeVendorData, { merge: false })
+        console.log('Vendor profile created successfully')
+        
+        // Send email confirmation asynchronously (non-blocking)
+        sendEmailConfirmation(completeVendorData, otp).catch(console.error)
+        
+        // Clear sessionStorage
+        sessionStorage.removeItem('vendorData')
+      })
+      .catch(error => {
+        console.error('Error creating vendor profile:', error)
+        // Hide success message and show error if database operation fails
+        setShowSuccess(false)
+        setErrors({ submit: 'Failed to create profile. Please try again.' })
+      })
+
+    // Navigate after showing success message
+    setTimeout(() => {
+      navigate('/login/vendor', {
+        state: {
+          message: 'Profile created! Please check your email for verification link and OTP.'
+        }
+      })
+    }, 2000) // Give user 2 seconds to see success message
   }
 
   const handleBack = () => {
@@ -203,7 +198,17 @@ export function VendorPasswordStep() {
                   onClick={() => setShowPassword(!showPassword)}
                   tabIndex="-1"
                 >
-                  {showPassword ? '👁' : '👁‍🗨'}
+                  {showPassword ? (
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                      <circle cx="12" cy="12" r="3"/>
+                    </svg>
+                  ) : (
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/>
+                      <line x1="1" y1="1" x2="23" y2="23"/>
+                    </svg>
+                  )}
                 </button>
               </div>
               {errors.password && <span className="field-error">{errors.password}</span>}
@@ -230,7 +235,17 @@ export function VendorPasswordStep() {
                   onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                   tabIndex="-1"
                 >
-                  {showConfirmPassword ? '👁' : '👁‍🗨'}
+                  {showConfirmPassword ? (
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                      <circle cx="12" cy="12" r="3"/>
+                    </svg>
+                  ) : (
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/>
+                      <line x1="1" y1="1" x2="23" y2="23"/>
+                    </svg>
+                  )}
                 </button>
               </div>
               {errors.confirmPassword && <span className="field-error">{errors.confirmPassword}</span>}
@@ -241,16 +256,14 @@ export function VendorPasswordStep() {
                 type="button"
                 onClick={handleBack}
                 className="btn btn-ghost"
-                disabled={loading}
               >
                 Back
               </button>
               <button
                 type="submit"
                 className="btn btn-primary"
-                disabled={loading}
               >
-                {loading ? 'Submitting...' : 'Submit'}
+                Submit
               </button>
             </div>
           </form>

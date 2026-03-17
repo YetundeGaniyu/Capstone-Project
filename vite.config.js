@@ -10,4 +10,14 @@ export default defineConfig({
       },
     }),
   ],
+  server: {
+    host: true, // Disable host check
+    port: 5173,
+    strictPort: true, // Use strict port checking
+    open: true, // Open browser automatically
+  },
+  clearScreen: false,
+  define: {
+    'process.env.NODE_ENV': JSON.stringify(process.env.NODE_ENV) || '"development"'
+  }
 })
