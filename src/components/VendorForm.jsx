@@ -44,7 +44,7 @@ export function VendorForm() {
   })
   const [errors, setErrors] = useState({})
   const [saving, setSaving] = useState(false)
-  const [savedMessage, setSavedMessage] = useState('')
+  const [error, setError] = useState(null)
   const navigate = useNavigate()
 
   useEffect(() => {
@@ -138,8 +138,8 @@ export function VendorForm() {
     return newErrors
   }
 
-  const handleSubmit = async (event) => {
-    event.preventDefault()
+  const handleSubmit = async (e) => {
+    e.preventDefault()  // THIS IS CRITICAL - prevents page reload
     const validationErrors = validate()
     if (Object.keys(validationErrors).length > 0) {
       setErrors(validationErrors)
@@ -147,28 +147,33 @@ export function VendorForm() {
     }
 
     setSaving(true)
-    setSavedMessage('')
-
+    setError(null)
+    
     try {
-      // Save form data to sessionStorage for next step
+      console.log('💾 Saving vendor data to localStorage:', formValues)
+      
+      // Save form data to localStorage for next step
       const vendorData = {
         fullName: formValues.fullName.trim(),
         businessName: formValues.businessName.trim(),
+        email: formValues.email.trim(),
         category: formValues.category,
         description: formValues.description.trim(),
         phone: formValues.phone.trim(),
         whatsapp: formValues.whatsapp.trim(),
         address: formValues.address.trim(),
         workingHours: formValues.workingHours,
-        email: formValues.email.trim(),
       }
 
-      sessionStorage.setItem('vendorData', JSON.stringify(vendorData))
-
+      localStorage.setItem('pendingVendorData', JSON.stringify(vendorData))
+      
+      console.log('➡️ Navigating to password step...')
+      
       // Navigate to password step
       navigate('/vendor/password')
+      
     } catch (error) {
-      console.error('Error saving vendor data:', error)
+      console.error('❌ Error saving vendor data:', error)
       setErrors({ submit: 'Failed to save data. Please try again.' })
     } finally {
       setSaving(false)
@@ -185,6 +190,11 @@ export function VendorForm() {
           </p>
 
           <form className="form" onSubmit={handleSubmit} noValidate>
+            {error && (
+              <div className="error-message">
+                {error}
+              </div>
+            )}
             <label className="field">
               <span className="field-label">Full Name</span>
               <input
@@ -314,10 +324,8 @@ export function VendorForm() {
             </div>
 
             <button type="submit" className="btn btn-primary btn-block" disabled={saving}>
-              {saving ? 'Saving...' : 'Continue'}
+              {saving ? 'Saving...' : 'Create Business Profile'}
             </button>
-
-            {savedMessage && <p className="field-help">{savedMessage}</p>}
 
             <div className="auth-footer">
               <p>Already have an account?</p>

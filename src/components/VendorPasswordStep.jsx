@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { doc, setDoc } from 'firebase/firestore'
-import { db } from '../services/firebase'
+import { authAPI } from '../services/apiService'
 
 export function VendorPasswordStep() {
   const navigate = useNavigate()
@@ -13,12 +12,13 @@ export function VendorPasswordStep() {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false)
   const [errors, setErrors] = useState({})
   const [showSuccess, setShowSuccess] = useState(false)
+  const [loading, setLoading] = useState(false)
 
-  const vendorData = JSON.parse(sessionStorage.getItem('vendorData') || '{}')
+  const vendorData = JSON.parse(localStorage.getItem('pendingVendorData') || '{}')
   
   // Initialize form with saved data if available
   useEffect(() => {
-    const storedData = JSON.parse(sessionStorage.getItem('vendorData') || '{}')
+    const storedData = JSON.parse(localStorage.getItem('pendingVendorData') || '{}')
     const formDataFromStorage = storedData.passwordData || {}
     
     // Only set form data if there's saved password data
@@ -28,10 +28,6 @@ export function VendorPasswordStep() {
         setFormData(formDataFromStorage)
       }, 0)
     }
-    
-    // Clean up vendorData by removing passwordData
-    delete storedData.passwordData
-    sessionStorage.setItem('vendorData', JSON.stringify(storedData))
   }, [])
 
   const handleChange = (e) => {
@@ -58,25 +54,6 @@ export function VendorPasswordStep() {
     return newErrors
   }
 
-  const generateVendorId = () => {
-    return `VND_${Date.now()}_${Math.random().toString(36).substr(2, 9).toUpperCase()}`
-  }
-
-  const generateOTP = () => {
-    return Math.floor(100000 + Math.random() * 900000).toString()
-  }
-
-  const sendEmailConfirmation = async (vendorData, otp) => {
-    // In production, this would send an email with verification link and OTP
-    // For now, we'll just log it to avoid delays
-    console.log('Email confirmation would be sent to:', vendorData.email)
-    console.log('Verification link:', `https://smeconnect.com/verify/${vendorData.vendorId}`)
-    console.log('OTP:', otp)
-    
-    // Return immediately to avoid submission delays
-    return Promise.resolve(true)
-  }
-
   const handleSubmit = async (e) => {
     e.preventDefault()
     const validationErrors = validate()
@@ -91,67 +68,62 @@ export function VendorPasswordStep() {
       return
     }
 
-    // Show immediate success feedback before any async operations
-    setShowSuccess(true)
-    setErrors({})
-
-    // Generate data
-    const vendorId = generateVendorId()
-    const otp = generateOTP()
-    const expirationTime = new Date(Date.now() + 24 * 60 * 60 * 1000)
-    
+    // Prepare form data for backend
     const completeVendorData = {
       ...vendorData,
-      vendorId,
       password: formData.password,
-      createdAt: new Date().toISOString(),
-      status: 'pending_verification',
-      emailVerified: false,
-      otpVerified: false,
-      otp: otp,
-      otpExpiration: expirationTime.toISOString(),
-      verificationLinkExpiration: expirationTime.toISOString(),
+      businessName: vendorData.businessName || vendorData.fullName,
+      email: vendorData.email,
+      phone: vendorData.phone,
+      category: vendorData.category,
+      description: vendorData.description,
+      address: vendorData.address || vendorData.location,
+      workingHours: vendorData.workingHours,
+      whatsapp: vendorData.whatsapp || vendorData.phone,
     }
 
-    console.log('Creating vendor profile...')
+    console.log('🚀 Form data being sent:', completeVendorData)
+    
+    setLoading(true)
+    setErrors({})
 
-    // Perform database operations in background without blocking UI
-    Promise.resolve()
-      .then(async () => {
-        const vendorRef = doc(db, 'vendors', vendorId)
-        await setDoc(vendorRef, completeVendorData, { merge: false })
-        console.log('Vendor profile created successfully')
-        
-        // Send email confirmation asynchronously (non-blocking)
-        sendEmailConfirmation(completeVendorData, otp).catch(console.error)
-        
-        // Clear sessionStorage
-        sessionStorage.removeItem('vendorData')
-      })
-      .catch(error => {
-        console.error('Error creating vendor profile:', error)
-        // Hide success message and show error if database operation fails
-        setShowSuccess(false)
-        setErrors({ submit: 'Failed to create profile. Please try again.' })
-      })
+    try {
+      console.log('📤 Calling backend API...')
+      const response = await authAPI.registerProvider(completeVendorData)
+      console.log('✅ Backend response:', response)
 
-    // Navigate after showing success message
-    setTimeout(() => {
-      navigate('/login/vendor', {
-        state: {
-          message: 'Profile created! Please check your email for verification link and OTP.'
-        }
-      })
-    }, 2000) // Give user 2 seconds to see success message
+      // Show success message
+      setShowSuccess(true)
+      
+      // Clear localStorage
+      localStorage.removeItem('pendingVendorData')
+      
+      // Navigate to login with success message
+      setTimeout(() => {
+        navigate('/login/vendor', {
+          state: {
+            message: 'Registration successful! Please check your email for verification link and OTP.'
+          }
+        })
+      }, 2000)
+
+    } catch (error) {
+      console.error('❌ Registration error:', error)
+      console.error('❌ Error details:', error.message)
+      setErrors({ submit: error.message || 'Failed to create profile. Please try again.' })
+      setShowSuccess(false)
+    } finally {
+      setLoading(false)
+    }
   }
 
   const handleBack = () => {
-    // Save current password data to sessionStorage before going back
+    // Save current password data to localStorage before going back
     const currentData = {
       ...vendorData,
       passwordData: formData
     }
-    sessionStorage.setItem('vendorData', JSON.stringify(currentData))
+    localStorage.setItem('pendingVendorData', JSON.stringify(currentData))
     navigate('/vendor/create')
   }
 
@@ -262,8 +234,9 @@ export function VendorPasswordStep() {
               <button
                 type="submit"
                 className="btn btn-primary"
+                disabled={loading}
               >
-                Submit
+                {loading ? 'Creating Profile...' : 'Submit'}
               </button>
             </div>
           </form>

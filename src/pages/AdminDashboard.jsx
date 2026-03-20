@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react'
-import { collection, getDocs, doc, updateDoc, query, orderBy, limit, where, getDoc } from 'firebase/firestore'
-import { db } from '../services/firebase'
+import { providersAPI } from '../services/apiService'
 import { useAuth } from '../context/AuthContext'
 
 export function AdminDashboard() {
@@ -10,7 +9,6 @@ export function AdminDashboard() {
   const [blacklistSuggestions, setBlacklistSuggestions] = useState([])
   const [pendingApprovals, setPendingApprovals] = useState([])
   const [loading, setLoading] = useState(true)
-  const [selectedActivity, setSelectedActivity] = useState(null)
   const [manualControlMode, setManualControlMode] = useState(false)
   const [serverStatus, setServerStatus] = useState('online')
 
@@ -40,22 +38,16 @@ export function AdminDashboard() {
       type,
       description,
       timestamp: new Date().toISOString(),
-      adminId: currentUser.uid,
-      adminEmail: currentUser.email,
+      adminId: currentUser?.uid || 'admin',
+      adminEmail: currentUser?.email || 'admin@example.com',
       targetId
     }
     
     // Add to local state immediately
     setActivities(prev => [activity, ...prev])
     
-    // Also save to database (in production)
-    try {
-      const activitiesRef = collection(db, 'adminActivities')
-      // Note: In production, you'd use addDoc here
-      console.log('Activity logged:', activity)
-    } catch (error) {
-      console.error('Error logging activity:', error)
-    }
+    // In production, this would call an API endpoint
+    console.log('Activity logged:', activity)
   }
 
   useEffect(() => {
@@ -63,31 +55,33 @@ export function AdminDashboard() {
 
     const fetchData = async () => {
       try {
-        // Fetch vendors
-        const vendorsSnapshot = await getDocs(collection(db, 'vendors'))
-        const vendorsList = vendorsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }))
+        // Fetch vendors using API
+        const vendorsResponse = await providersAPI.getAll()
+        const vendorsList = vendorsResponse.data || []
         setVendors(vendorsList)
 
-        // Fetch pending approvals
-        const pendingQuery = query(collection(db, 'vendors'), where('status', '==', 'pending'))
-        const pendingSnapshot = await getDocs(pendingQuery)
-        const pendingList = pendingSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }))
+        // For demo purposes, filter pending approvals
+        const pendingList = vendorsList.filter(v => v.status === 'pending')
         setPendingApprovals(pendingList)
 
-        // Fetch admin activities
-        const activitiesSnapshot = await getDocs(
-          query(collection(db, 'adminActivities'), orderBy('timestamp', 'desc'), limit(100))
-        )
-        const activitiesList = activitiesSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }))
-        setActivities(activitiesList)
+        // Mock activities for demo
+        const mockActivities = [
+          {
+            id: '1',
+            type: 'VENDOR_APPROVAL',
+            description: 'Approved vendor: Demo Business',
+            timestamp: new Date().toISOString(),
+            adminId: 'admin',
+            adminEmail: 'admin@example.com'
+          }
+        ]
+        setActivities(mockActivities)
 
         // AI detection for review manipulation
         const suspiciousVendors = vendorsList.filter(v => {
-          // Multiple AI detection criteria
           const hasLowRating = v.rating && v.rating < 2.5 && v.reviewCount > 5
-          const hasSuspiciousPattern = v.reviewCount > 50 && v.rating === 5.0 // Perfect rating with many reviews
-          const hasRecentSpikes = v.recentReviewCount > v.averageReviewCount * 3 // Recent spike in reviews
-          return hasLowRating || hasSuspiciousPattern || hasRecentSpikes
+          const hasSuspiciousPattern = v.reviewCount > 50 && v.rating === 5.0
+          return hasLowRating || hasSuspiciousPattern
         }).map(v => ({
           ...v,
           reason: v.rating && v.rating < 2.5 ? 'Low rating with high review count' :
@@ -96,7 +90,6 @@ export function AdminDashboard() {
         }))
         setBlacklistSuggestions(suspiciousVendors)
 
-        // Check server status (simulate)
         setServerStatus('online')
 
       } catch (error) {
@@ -112,11 +105,8 @@ export function AdminDashboard() {
 
   const handleApproveVendor = async (vendorId) => {
     try {
-      await updateDoc(doc(db, 'vendors', vendorId), {
-        status: 'approved',
-        approvedAt: new Date().toISOString(),
-        approvedBy: currentUser.uid
-      })
+      // In production, this would call adminAPI.verifyProvider()
+      console.log('Approving vendor:', vendorId)
       
       setPendingApprovals(pendingApprovals.filter(v => v.id !== vendorId))
       setVendors(vendors.map(v => 
@@ -131,11 +121,8 @@ export function AdminDashboard() {
 
   const handleRejectVendor = async (vendorId) => {
     try {
-      await updateDoc(doc(db, 'vendors', vendorId), {
-        status: 'rejected',
-        rejectedAt: new Date().toISOString(),
-        rejectedBy: currentUser.uid
-      })
+      // In production, this would call adminAPI.rejectProvider()
+      console.log('Rejecting vendor:', vendorId)
       
       setPendingApprovals(pendingApprovals.filter(v => v.id !== vendorId))
       setVendors(vendors.map(v => 
@@ -150,11 +137,8 @@ export function AdminDashboard() {
 
   const handleApproveBlacklist = async (vendorId) => {
     try {
-      await updateDoc(doc(db, 'vendors', vendorId), {
-        blacklisted: true,
-        blacklistedAt: new Date().toISOString(),
-        blacklistedBy: currentUser.uid
-      })
+      // In production, this would call an API endpoint
+      console.log('Blacklisting vendor:', vendorId)
       
       setVendors(vendors.map(v => 
         v.id === vendorId ? { ...v, blacklisted: true } : v
@@ -176,12 +160,8 @@ export function AdminDashboard() {
     if (!manualControlMode) return
     
     try {
-      await updateDoc(doc(db, 'vendors', vendorId), {
-        blacklisted: true,
-        blacklistedAt: new Date().toISOString(),
-        blacklistedBy: currentUser.uid,
-        blacklistReason: 'Manual admin action (server down mode)'
-      })
+      // In production, this would call an API endpoint
+      console.log('Manually blacklisting vendor:', vendorId)
       
       setVendors(vendors.map(v => 
         v.id === vendorId ? { ...v, blacklisted: true } : v
@@ -197,14 +177,9 @@ export function AdminDashboard() {
     if (!manualControlMode) return
     
     try {
-      await updateDoc(doc(db, 'vendors', vendorId), {
-        status: 'approved',
-        approvedAt: new Date().toISOString(),
-        approvedBy: currentUser.uid,
-        approvalReason: 'Manual admin action (server down mode)'
-      })
+      // In production, this would call an API endpoint
+      console.log('Manually approving vendor:', vendorId)
       
-      setPendingApprovals(pendingApprovals.filter(v => v.id !== vendorId))
       setVendors(vendors.map(v => 
         v.id === vendorId ? { ...v, status: 'approved' } : v
       ))

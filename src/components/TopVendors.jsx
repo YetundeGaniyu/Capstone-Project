@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react'
-import { collection, getDocs, query, orderBy, limit } from 'firebase/firestore'
-import { db } from '../services/firebase'
+import { providersAPI } from '../services/apiService'
 
 export function TopVendors() {
   const [vendors, setVendors] = useState([])
@@ -9,15 +8,12 @@ export function TopVendors() {
   useEffect(() => {
     const fetchTopVendors = async () => {
       try {
-        const vendorsQuery = query(
-          collection(db, 'vendors'),
-          orderBy('rating', 'desc'),
-          limit(6)
-        )
-        const snapshot = await getDocs(vendorsQuery)
-        const topVendors = snapshot.docs
-          .map(doc => ({ id: doc.id, ...doc.data() }))
+        const response = await providersAPI.getAll()
+        const allVendors = response.data || []
+        const topVendors = allVendors
           .filter(vendor => vendor.rating && vendor.rating > 0)
+          .sort((a, b) => b.rating - a.rating)
+          .slice(0, 6)
         
         setVendors(topVendors)
       } catch (error) {

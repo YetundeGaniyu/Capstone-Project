@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react'
-import { collection, getDocs } from 'firebase/firestore'
-import { db } from '../services/firebase'
+import { providersAPI } from '../services/apiService'
 import { FilterBar } from './FilterBar.jsx'
 import { VendorCard } from './VendorCard.jsx'
 
@@ -94,10 +93,9 @@ export function VendorList() {
     let cancelled = false
     async function load() {
       try {
-        const snap = await getDocs(collection(db, 'vendors'))
+        const response = await providersAPI.getAll()
         if (cancelled) return
-        const list = snap.docs
-          .map((d) => ({ id: d.id, ...d.data() }))
+        const list = (response.data || [])
           .filter((v) => !v.blacklisted)
         setVendors(list)
       } catch (err) {

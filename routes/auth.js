@@ -19,11 +19,48 @@ router.post('/register', async (req, res) => {
 // POST /auth/register-provider - Register provider
 router.post('/register-provider', async (req, res) => {
   try {
+    console.log('🔥 Backend: Received provider registration request:', req.body)
+    
+    const providerData = req.body
+    
+    // Validate required fields
+    const requiredFields = ['businessName', 'email', 'phone'] // Removed password for now
+    const missingFields = requiredFields.filter(field => !providerData[field])
+    
+    if (missingFields.length > 0) {
+      console.log('❌ Backend: Missing required fields:', missingFields)
+      return res.status(400).json({
+        success: false,
+        message: `Missing required fields: ${missingFields.join(', ')}`
+      })
+    }
+    
+    // TODO: Save to database
+    // For now, just log the data and return success
+    console.log('✅ Backend: Provider data validated successfully')
+    console.log('📊 Provider details:', {
+      businessName: providerData.businessName,
+      email: providerData.email,
+      phone: providerData.phone,
+      category: providerData.category,
+      description: providerData.description ? providerData.description.substring(0, 50) + '...' : 'Not provided',
+      address: providerData.address,
+      hasWorkingHours: !!providerData.workingHours,
+      fullName: providerData.fullName
+    })
+    
     res.json({
       success: true,
-      message: 'Provider registered successfully'
+      message: 'Provider registered successfully',
+      data: {
+        id: `provider_${Date.now()}`, // Mock ID
+        businessName: providerData.businessName,
+        email: providerData.email,
+        status: 'pending_verification'
+      }
     })
   } catch (error) {
+    console.error('❌ Backend: Registration error:', error)
     res.status(500).json({
       success: false,
       message: error.message

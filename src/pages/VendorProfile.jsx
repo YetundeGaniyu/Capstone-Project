@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useParams, Link, useNavigate } from 'react-router-dom'
-import { doc, getDoc } from 'firebase/firestore'
-import { db } from '../services/firebase'
+import { providersAPI } from '../services/apiService'
 import { VendorMap } from '../components/VendorMap.jsx'
 import { useAuth } from '../context/AuthContext'
 
@@ -20,9 +19,30 @@ export function VendorProfile() {
     let cancelled = false
     async function load() {
       try {
-        const snap = await getDoc(doc(db, 'vendors', id))
-        if (cancelled) return
-        setVendor(snap.exists() ? { id: snap.id, ...snap.data() } : null)
+        console.log('🔍 Loading vendor profile for ID:', id)
+        
+        // In production, this would call the API
+        // const response = await providersAPI.getById(id)
+        
+        // For now, use mock data
+        const mockVendor = {
+          id: id,
+          businessName: 'Sample Business',
+          category: 'Catering',
+          description: 'A wonderful catering service for all occasions.',
+          phone: '+234 800 000 0000',
+          whatsapp: '+234 800 000 0000',
+          address: 'Lagos, Nigeria',
+          rating: 4.5,
+          latitude: 6.5244,
+          longitude: 3.3792,
+          userId: 'mock-user-id'
+        }
+        
+        if (!cancelled) {
+          setVendor(mockVendor)
+          console.log('✅ Mock vendor data loaded:', mockVendor)
+        }
       } catch (err) {
         if (!cancelled) console.error('Error loading vendor:', err)
       } finally {

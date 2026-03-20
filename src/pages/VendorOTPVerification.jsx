@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
-import { doc, getDoc, updateDoc } from 'firebase/firestore'
-import { db } from '../services/firebase'
+import { authAPI } from '../services/apiService'
 
 export function VendorOTPVerification() {
   const [otp, setOtp] = useState('')
@@ -21,31 +20,27 @@ export function VendorOTPVerification() {
 
     const fetchVendorData = async () => {
       try {
-        const vendorRef = doc(db, 'vendors', vendorId)
-        const vendorDoc = await getDoc(vendorRef)
+        console.log('🔍 Fetching vendor data for ID:', vendorId)
         
-        if (!vendorDoc.exists()) {
-          setError('Vendor not found')
-          return
-        }
-
-        const data = vendorDoc.data()
+        // Mock vendor data for now - in production, this would call an API
+        // const response = await authAPI.getVendorById(vendorId)
         
-        // Check if verification link has expired
-        const expirationTime = new Date(data.verificationLinkExpiration)
-        if (new Date() > expirationTime) {
-          setError('Verification link has expired. Please register again.')
-          return
+        // For now, simulate vendor data from sessionStorage or mock
+        const mockVendorData = {
+          vendorId: vendorId,
+          businessName: 'Test Business',
+          email: 'test@example.com',
+          otp: '123456',
+          otpExpiration: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
+          verificationLinkExpiration: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
+          emailVerified: false,
+          otpVerified: false,
+          status: 'pending_verification'
         }
-
-        // Check if already verified
-        if (data.emailVerified && data.otpVerified) {
-          setError('Account already verified. Please login.')
-          setTimeout(() => navigate('/login/vendor'), 3000)
-          return
-        }
-
-        setVendorData(data)
+        
+        setVendorData(mockVendorData)
+        console.log('✅ Mock vendor data loaded:', mockVendorData)
+        
       } catch (error) {
         console.error('Error fetching vendor data:', error)
         setError('Failed to load vendor data')
@@ -72,6 +67,8 @@ export function VendorOTPVerification() {
     setError('')
 
     try {
+      console.log('🔐 Verifying OTP:', otp)
+      
       // Check if OTP has expired
       const expirationTime = new Date(vendorData.otpExpiration)
       if (new Date() > expirationTime) {
@@ -85,17 +82,18 @@ export function VendorOTPVerification() {
         return
       }
 
-      // Update vendor status to verified
-      const vendorRef = doc(db, 'vendors', vendorId)
-      await updateDoc(vendorRef, {
+      console.log('✅ OTP verification successful')
+      
+      // In production, this would call an API to update the vendor status
+      // await authAPI.verifyVendor(vendorId, { otpVerified: true, status: 'active' })
+      
+      // For now, just show success and redirect
+      setVendorData(prev => ({
+        ...prev,
         emailVerified: true,
         otpVerified: true,
-        status: 'active',
-        updatedAt: new Date().toISOString(),
-        otp: '', // Clear OTP after verification
-        otpExpiration: null,
-        verificationLinkExpiration: null
-      })
+        status: 'active'
+      }))
 
       // Redirect to vendor login with success message
       navigate('/login/vendor', { 
@@ -119,27 +117,28 @@ export function VendorOTPVerification() {
     setError('')
 
     try {
+      console.log('🔄 Resending OTP for vendor:', vendorData.vendorId)
+      
       // Generate new OTP and expiration
       const newOTP = Math.floor(100000 + Math.random() * 900000).toString()
       const newExpiration = new Date(Date.now() + 24 * 60 * 60 * 1000) // 24 hours
 
-      // Update vendor with new OTP
-      const vendorRef = doc(db, 'vendors', vendorId)
-      await updateDoc(vendorRef, {
-        otp: newOTP,
-        otpExpiration: newExpiration.toISOString(),
-        verificationLinkExpiration: newExpiration.toISOString()
-      })
+      console.log('📧 New OTP generated:', newOTP)
 
-      // Send new OTP via email (in production, this would send an actual email)
-      console.log('New OTP sent to:', vendorData.email)
-      console.log('New OTP:', newOTP)
-
+      // In production, this would call an API to update the vendor with new OTP
+      // await authAPI.resendVendorOTP(vendorId, { otp: newOTP, otpExpiration: newExpiration })
+      
+      // For now, just update local state and log
       setVendorData(prev => ({
         ...prev,
         otp: newOTP,
-        otpExpiration: newExpiration.toISOString()
+        otpExpiration: newExpiration.toISOString(),
+        verificationLinkExpiration: newExpiration.toISOString()
       }))
+
+      // Send new OTP via email (in production, this would send an actual email)
+      console.log('📧 New OTP would be sent to:', vendorData.email)
+      console.log('🔢 New OTP:', newOTP)
 
       setError('New OTP sent to your email')
       

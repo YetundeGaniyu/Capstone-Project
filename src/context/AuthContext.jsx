@@ -1,8 +1,4 @@
 import { createContext, useContext, useState, useEffect } from 'react'
-import { doc, getDoc, setDoc, collection, query, where } from 'firebase/firestore'
-import { signOut, onAuthStateChanged, signInWithEmailAndPassword, createUserWithEmailAndPassword } from 'firebase/auth'
-import { auth, db } from '../services/firebase'
-import { authAPI } from '../services/apiService'
 
 const AuthContext = createContext()
 
@@ -17,7 +13,7 @@ export function useAuth() {
 export function AuthProvider({ children }) {
   const [currentUser, setCurrentUser] = useState(null)
   const [userRole, setUserRole] = useState(null)
-  const [loading, setLoading] = useState(true)
+  const [loading, setLoading] = useState(false)
   const [savedAccounts, _setSavedAccounts] = useState([])
 
   // Load saved accounts from localStorage on mount
@@ -26,33 +22,13 @@ export function AuthProvider({ children }) {
     if (saved) {
       try {
         const parsedSaved = JSON.parse(saved)
-        _setSavedAccounts(parsedSaved)
+        setTimeout(() => _setSavedAccounts(parsedSaved), 0)
       } catch (error) {
         console.error('Error loading saved accounts:', error)
       }
     }
   }, [])
 
-  // Save Google account to localStorage
-  const saveGoogleAccount = (user) => {
-    const accountData = {
-      uid: user.uid,
-      email: user.email,
-      displayName: user.displayName,
-      photoURL: user.photoURL,
-      lastLogin: new Date().toISOString()
-    }
-
-    _setSavedAccounts(prevAccounts => {
-      const existingIndex = prevAccounts.findIndex(acc => acc.uid === user.uid)
-      const updatedAccounts = existingIndex >= 0
-        ? [...prevAccounts].map((acc, index) => index === existingIndex ? accountData : acc)
-        : [...prevAccounts, accountData]
-      
-      localStorage.setItem('savedGoogleAccounts', JSON.stringify(updatedAccounts))
-      return updatedAccounts
-    })
-  }
 
   // Sign in with Google and set role
   async function signInWithGoogle(role = null) {
@@ -98,51 +74,23 @@ export function AuthProvider({ children }) {
   }
 
   async function setRole(role) {
-    if (!currentUser) return
-
-    try {
-      const userDocRef = doc(db, 'users', currentUser.uid)
-      await setDoc(userDocRef, { role }, { merge: true })
-      setUserRole(role)
-    } catch (error) {
-      console.error('Error setting user role:', error)
-      throw error
-    }
+    // Mock function for now - would call API in full implementation
+    console.log('Setting role:', role)
+    setUserRole(role)
   }
 
   async function logout() {
     try {
-      await signOut(auth)
+      // Mock logout - just clear user state
+      setCurrentUser(null)
       setUserRole(null)
+      localStorage.removeItem('authToken')
+      console.log('User logged out successfully')
     } catch (error) {
       console.error('Error signing out:', error)
       throw error
     }
   }
-
-  useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, async (user) => {
-      setCurrentUser(user)
-
-      if (user) {
-        try {
-          const userDocRef = doc(db, 'users', user.uid)
-          const userDoc = await getDoc(userDocRef)
-          if (userDoc.exists()) {
-            setUserRole(userDoc.data().role || null)
-          }
-        } catch (error) {
-          console.error('Error fetching user role:', error)
-        }
-      } else {
-        setUserRole(null)
-      }
-
-      setLoading(false)
-    })
-
-    return unsubscribe
-  }, [])
 
   const value = {
     currentUser,

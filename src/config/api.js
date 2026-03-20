@@ -5,7 +5,7 @@
 
 // Base API configuration
 export const API_CONFIG = {
-  BASE_URL: 'https://askyello-backend.onrender.com',
+  BASE_URL: 'https://askyello-backend.onrender.com/api/v1',
   TIMEOUT: 10000, // 10 seconds
   RETRY_ATTEMPTS: 3,
 }
