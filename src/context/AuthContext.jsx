@@ -36,7 +36,7 @@ export function AuthProvider({ children }) {
       console.log('Starting Google sign-in with role:', role)
       
       // Redirect to Google OAuth endpoint for browser authentication
-      window.location.href = 'https://askyello-backend.onrender.com/auth/google'
+      window.location.href = 'https://askyello-backend.onrender.com/api/v1/auth/google'
       
       // Store authentication token
       localStorage.setItem('authToken', 'mock-google-token')
