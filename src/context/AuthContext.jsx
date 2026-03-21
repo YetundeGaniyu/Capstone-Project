@@ -13,8 +13,44 @@ export function useAuth() {
 export function AuthProvider({ children }) {
   const [currentUser, setCurrentUser] = useState(null)
   const [userRole, setUserRole] = useState(null)
-  const [loading, setLoading] = useState(false)
+  const [isAuthenticated, setIsAuthenticated] = useState(false)
+  const [loading, setLoading] = useState(true)
   const [savedAccounts, _setSavedAccounts] = useState([])
+
+  useEffect(() => {
+    const validateAuth = async () => {
+      const token = localStorage.getItem('authToken')
+      
+      if (!token) {
+        setIsAuthenticated(false)
+        setLoading(false)
+        return
+      }
+
+      // Check if token is expired (JWT tokens have expiry)
+      try {
+        // Decode JWT payload to check expiry
+        const payload = JSON.parse(atob(token.split('.')[1]))
+        const isExpired = payload.exp * 1000 < Date.now()
+        
+        if (isExpired) {
+          localStorage.removeItem('authToken')
+          localStorage.removeItem('user')
+          setIsAuthenticated(false)
+        } else {
+          setIsAuthenticated(true)
+        }
+      } catch {
+        // Invalid token format — clear it
+        localStorage.removeItem('authToken')
+        setIsAuthenticated(false)
+      } finally {
+        setLoading(false)
+      }
+    }
+    
+    validateAuth()
+  }, [])
 
   // Load saved accounts from localStorage on mount
   useEffect(() => {
@@ -28,7 +64,6 @@ export function AuthProvider({ children }) {
       }
     }
   }, [])
-
 
   // Sign in with Google and set role
   async function signInWithGoogle(role = null) {
@@ -95,11 +130,12 @@ export function AuthProvider({ children }) {
   const value = {
     currentUser,
     userRole,
+    isAuthenticated,
+    loading,
     savedAccounts,
     signInWithGoogle,
     setRole,
-    logout,
-    loading
+    logout
   }
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>

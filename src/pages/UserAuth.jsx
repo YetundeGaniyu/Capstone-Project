@@ -3,9 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 
 export function UserAuth() {
-  const { signInWithGoogle, currentUser } = useAuth();
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
+  const { currentUser } = useAuth();
   const [authMode, setAuthMode] = useState("signin"); // 'signin' or 'signup'
   const navigate = useNavigate();
 
@@ -16,17 +14,13 @@ export function UserAuth() {
   }
 
   const handleGoogleAuth = async () => {
-    setLoading(true);
-    setError("");
-    try {
-      await signInWithGoogle("user");
-      navigate("/dashboard");
-    } catch (err) {
-      setError("Failed to authenticate with Google. Please try again.");
-      console.error(err);
-    } finally {
-      setLoading(false);
-    }
+    // Clear any stale auth data before redirecting to Google
+    localStorage.removeItem('authToken')
+    localStorage.removeItem('user')
+    localStorage.removeItem('pendingVendorData')
+    
+    // Then redirect to Google OAuth
+    window.location.href = 'https://askyello-backend.onrender.com/api/v1/auth/google'
   };
 
   return (
@@ -41,8 +35,6 @@ export function UserAuth() {
               ? "Sign in to find and connect with trusted service providers"
               : "Join SMEsConnect to discover amazing service providers"}
           </p>
-
-          {error && <div className="error-message">{error}</div>}
 
           <div className="auth-mode-toggle">
             <button
@@ -71,10 +63,9 @@ export function UserAuth() {
                 <button
                   type="button"
                   onClick={handleGoogleAuth}
-                  disabled={loading}
                   className="btn btn-primary btn-block"
                 >
-                  {loading ? "Signing in..." : "Continue with Google"}
+                  Continue with Google
                 </button>
               </div>
             ) : (
@@ -86,10 +77,9 @@ export function UserAuth() {
                 <button
                   type="button"
                   onClick={handleGoogleAuth}
-                  disabled={loading}
                   className="btn btn-primary btn-block"
                 >
-                  {loading ? "Creating account..." : "Continue with Google"}
+                  Continue with Google
                 </button>
               </div>
             )}

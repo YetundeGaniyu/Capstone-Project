@@ -2,7 +2,7 @@ import { Navigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 
 export function ProtectedRoute({ children, requireRole }) {
-  const { currentUser, userRole, loading } = useAuth()
+  const { currentUser, userRole, isAuthenticated, loading } = useAuth()
 
   if (loading) {
     return (
@@ -30,7 +30,7 @@ export function ProtectedRoute({ children, requireRole }) {
     return <Navigate to="/admin/access" replace />
   }
 
-  if (!currentUser) {
+  if (!isAuthenticated) {
     return <Navigate to="/login" replace />
   }
 
