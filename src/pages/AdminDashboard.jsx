@@ -1,9 +1,11 @@
 import { useState, useEffect } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { providersAPI } from '../services/apiService'
 import { useAuth } from '../context/AuthContext'
 
 export function AdminDashboard() {
   const { currentUser, userRole } = useAuth()
+  const navigate = useNavigate()
   const [activities, setActivities] = useState([])
   const [vendors, setVendors] = useState([])
   const [blacklistSuggestions, setBlacklistSuggestions] = useState([])
@@ -14,23 +16,20 @@ export function AdminDashboard() {
 
   // Check admin session
   const checkAdminSession = () => {
-    const session = localStorage.getItem('adminSession')
-    if (session) {
-      try {
-        const sessionData = JSON.parse(session)
-        const sessionAge = Date.now() - new Date(sessionData.timestamp).getTime()
-        // Session expires after 24 hours
-        return sessionAge < 24 * 60 * 60 * 1000 && sessionData.loggedIn
-      } catch (error) {
-        console.error('Error parsing admin session:', error)
-        return false
-      }
-    }
-    return false
+    const token = localStorage.getItem('authToken')
+    const isAdmin = localStorage.getItem('isAdmin') === 'true'
+    return token && isAdmin
+  }
+
+  // Logout function
+  const handleLogout = () => {
+    localStorage.removeItem('authToken')
+    localStorage.removeItem('isAdmin')
+    navigate('/admin')
   }
 
   // Check if user is admin
-  const isAdmin = checkAdminSession() && currentUser && userRole === 'admin'
+  const isAdmin = checkAdminSession()
 
   // Log admin activity
   const logActivity = (type, description, targetId = null) => {
@@ -234,6 +233,12 @@ export function AdminDashboard() {
                 className={`btn ${manualControlMode ? 'btn-danger' : 'btn-ghost'} btn-sm`}
               >
                 {manualControlMode ? 'Manual Mode ON' : 'Manual Mode OFF'}
+              </button>
+              <button 
+                onClick={handleLogout}
+                className="btn btn-outline btn-sm"
+              >
+                Logout
               </button>
             </div>
           </div>

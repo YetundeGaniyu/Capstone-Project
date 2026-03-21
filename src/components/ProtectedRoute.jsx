@@ -14,20 +14,13 @@ export function ProtectedRoute({ children, requireRole }) {
 
   // Check admin session for admin routes
   if (requireRole === 'admin') {
-    const session = localStorage.getItem('adminSession')
-    if (session) {
-      try {
-        const sessionData = JSON.parse(session)
-        // eslint-disable-next-line
-        const sessionAge = Date.now() - new Date(sessionData.timestamp).getTime()
-        if (sessionAge < 24 * 60 * 60 * 1000 && sessionData.loggedIn) {
-          return children
-        }
-      } catch (error) {
-        console.error('Error parsing admin session:', error)
-      }
+    const token = localStorage.getItem('authToken')
+    const isAdmin = localStorage.getItem('isAdmin') === 'true'
+    
+    if (!token || !isAdmin) {
+      return <Navigate to="/admin/access" replace />
     }
-    return <Navigate to="/admin/access" replace />
+    return children
   }
 
   if (!isAuthenticated) {

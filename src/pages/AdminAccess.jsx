@@ -1,8 +1,9 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { authAPI } from '../services/apiService'
 
 export function AdminAccess() {
-  const [credentials, setCredentials] = useState({
+  const [formValues, setFormValues] = useState({
     email: '',
     password: '',
     adminKey: ''
@@ -31,85 +32,46 @@ export function AdminAccess() {
   // Check if user is admin
   const isAdmin = checkAdminSession()
 
-  const handleSubmit = async (e) => {
-    e.preventDefault()
-    
-    console.log('Admin login attempt:', credentials)
-    console.log('Form values:', {
-      email: credentials.email,
-      password: credentials.password,
-      adminKey: credentials.adminKey
+  const handleAdminLogin = async (e) => {
+  e.preventDefault()
+  setLoading(true)
+  setError('')
+  
+  try {
+    const response = await authAPI.login({
+      email: formValues.email,
+      password: formValues.password,
+      adminKey: formValues.adminKey,
     })
     
-    if (!credentials.email || !credentials.password || !credentials.adminKey) {
-      setError('Please enter email, password, and admin key')
-      return
-    }
-
-    setLoading(true)
-    setError('')
-
-    try {
-      // Admin credentials - trim input values to prevent whitespace issues
-      const ADMIN_CREDENTIALS = {
-        email: 'admin@smeconnect.com',
-        password: 'Admin@2024!Secure',
-        adminKey: 'ADMIN-2024-KEY'
-      }
+    console.log('Admin login response:', response)
+    
+    if (response.success && response.token) {
       
-      const trimmedCredentials = {
-        email: credentials.email.trim(),
-        password: credentials.password.trim(),
-        adminKey: credentials.adminKey.trim()
-      }
-      
-      console.log('Expected credentials:', ADMIN_CREDENTIALS)
-      console.log('Submitted credentials:', trimmedCredentials)
-      console.log('Email match:', trimmedCredentials.email === ADMIN_CREDENTIALS.email)
-      console.log('Password match:', trimmedCredentials.password === ADMIN_CREDENTIALS.password)
-      console.log('Admin key match:', trimmedCredentials.adminKey === ADMIN_CREDENTIALS.adminKey)
-      
-      if (trimmedCredentials.email === ADMIN_CREDENTIALS.email && 
-          trimmedCredentials.password === ADMIN_CREDENTIALS.password &&
-          trimmedCredentials.adminKey === ADMIN_CREDENTIALS.adminKey) {
-        
-        console.log('Authentication successful!')
-        
-        // Store admin session
-        const sessionData = {
-          loggedIn: true,
-          timestamp: new Date().toISOString(),
-          email: trimmedCredentials.email
-        }
-        
-        console.log('Storing session:', sessionData)
-        localStorage.setItem('adminSession', JSON.stringify(sessionData))
-        
-        // Verify session was stored
-        const storedSession = localStorage.getItem('adminSession')
-        console.log('Session verification:', storedSession)
-        
-        // Small delay to ensure localStorage is set
-        setTimeout(() => {
-          console.log('Navigating to dashboard...')
-          navigate('/admin/dashboard')
-        }, 100)
-        
+      if (response.isAdmin === true) {
+        // Store token and admin flag
+        localStorage.setItem('authToken', response.token)
+        localStorage.setItem('isAdmin', 'true')
+        navigate('/admin/dashboard')
       } else {
-        console.log('Authentication failed!')
-        setError('Invalid admin credentials')
+        // Valid user but not admin
+        setError('Access denied. You do not have admin privileges.')
       }
-    } catch (err) {
-      console.error('Error during authentication:', err)
-      setError('Login failed. Please try again.')
-    } finally {
-      setLoading(false)
+      
+    } else {
+      setError(response.message || 'Invalid credentials')
     }
+    
+  } catch (error) {
+    setError(error.message || 'Login failed. Please try again.')
+  } finally {
+    setLoading(false)
   }
+}
 
   const handleInputChange = (e) => {
-    setCredentials({
-      ...credentials,
+    setFormValues({
+      ...formValues,
       [e.target.name]: e.target.value
     })
   }
@@ -128,7 +90,7 @@ export function AdminAccess() {
           <div className="admin-access-form">
             {error && <div className="error-message">{error}</div>}
             
-            <form className="form" onSubmit={handleSubmit}>
+            <form className="form" onSubmit={handleAdminLogin}>
               <div className="form-group">
                 <label htmlFor="email" className="form-label">
                   Email
@@ -137,7 +99,7 @@ export function AdminAccess() {
                   type="email"
                   id="email"
                   name="email"
-                  value={credentials.email}
+                  value={formValues.email}
                   onChange={handleInputChange}
                   className="form-input"
                   placeholder="Enter admin email"
@@ -153,7 +115,7 @@ export function AdminAccess() {
                   type="password"
                   id="password"
                   name="password"
-                  value={credentials.password}
+                  value={formValues.password}
                   onChange={handleInputChange}
                   className="form-input"
                   placeholder="Enter admin password"
@@ -169,7 +131,7 @@ export function AdminAccess() {
                   type="text"
                   id="adminKey"
                   name="adminKey"
-                  value={credentials.adminKey}
+                  value={formValues.adminKey}
                   onChange={handleInputChange}
                   className="form-input"
                   placeholder="Enter admin key"
