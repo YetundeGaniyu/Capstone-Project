@@ -12,7 +12,6 @@ export function AIChatBox() {
   ])
   const [input, setInput] = useState('')
   const [loading, setLoading] = useState(false)
-  const [error, setError] = useState('')
   const [pendingBlacklist, setPendingBlacklist] = useState([])
   const messagesEndRef = useRef(null)
   const panelRef = useRef(null)
@@ -28,7 +27,6 @@ export function AIChatBox() {
       } catch (err) {
         if (!cancelled) {
           console.error('Error loading vendors:', err)
-          setError('Could not load vendors')
         }
       }
     }
@@ -73,7 +71,6 @@ export function AIChatBox() {
     const text = input.trim()
     if (!text || loading) return
     setInput('')
-    setError('')
     const userMsg = { role: 'user', content: text }
     setMessages((m) => [...m, userMsg])
     setLoading(true)
@@ -85,8 +82,12 @@ export function AIChatBox() {
       setMessages((m) => [...m, { role: 'assistant', content: displayContent }])
       if (ids.length > 0) setPendingBlacklist(ids)
     } catch (err) {
-      setError(err.message || 'Something went wrong')
-      setMessages((m) => [...m, { role: 'assistant', content: 'Sorry, I could not complete that. Please try again.' }])
+      console.error('Chatbot error:', err)
+      // Show friendly message instead of raw error
+      setMessages(prev => [...prev, {
+        role: 'assistant',
+        content: 'Our assistant is temporarily unavailable. Please try again in a few minutes.'
+      }])
     } finally {
       setLoading(false)
     }
@@ -136,7 +137,6 @@ export function AIChatBox() {
             )}
             <div ref={messagesEndRef} />
           </div>
-          {error && <div className="ai-chat-error">{error}</div>}
           {pendingBlacklist.length > 0 && (
             <div className="ai-chat-blacklist-bar">
               <p>AI suggests blacklisting {pendingBlacklist.length} vendor(s) for rating manipulation.</p>
