@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useParams, Link, useNavigate } from 'react-router-dom'
 import { providersAPI } from '../services/apiService'
 import { VendorMap } from '../components/VendorMap.jsx'
@@ -6,62 +6,94 @@ import { useAuth } from '../context/AuthContext'
 
 export function VendorProfile() {
   const { id } = useParams()
+  const navigate = useNavigate()
   const { currentUser, userRole } = useAuth()
   const [vendor, setVendor] = useState(null)
+  const [reviews, setReviews] = useState([])
   const [loading, setLoading] = useState(true)
-  const navigate = useNavigate()
+  const [error, setError] = useState(null)
 
   useEffect(() => {
-    if (!id) {
-      setLoading(false)
-      return
-    }
-    let cancelled = false
-    async function load() {
+    const fetchVendorData = async () => {
       try {
+        setLoading(true)
+        setError(null)
+        
         console.log('🔍 Loading vendor profile for ID:', id)
         
-        // In production, this would call the API
-        // const response = await providersAPI.getById(id)
-        
-        // For now, use mock data
-        const mockVendor = {
-          id: id,
-          businessName: 'Sample Business',
-          category: 'Catering',
-          description: 'A wonderful catering service for all occasions.',
-          phone: '+234 800 000 0000',
-          whatsapp: '+234 800 000 0000',
-          address: 'Lagos, Nigeria',
-          rating: 4.5,
-          latitude: 6.5244,
-          longitude: 3.3792,
-          userId: 'mock-user-id'
+        // Strategy 1: Try direct API call first
+        try {
+          const vendorResponse = await providersAPI.getById(id)
+          console.log('Vendor data (direct):', vendorResponse)
+          
+          if (vendorResponse.success && vendorResponse.data) {
+            setVendor(vendorResponse.data)
+          } else {
+            throw new Error('Vendor not found in direct call')
+          }
+        } catch {
+          // Strategy 2: Fallback — get all providers and find by id
+          console.log('Direct fetch failed, searching from list...')
+          const allResponse = await providersAPI.getAll()
+          console.log('All providers loaded:', allResponse.data?.length, 'providers')
+          
+          const found = allResponse.data.find(p => 
+            (p.id === id || p._id === id)
+          )
+          
+          if (found) {
+            console.log('Found vendor in list:', found)
+            setVendor(found)
+          } else {
+            console.log('Vendor not found in list either')
+            setError('Vendor not found')
+          }
         }
-        
-        if (!cancelled) {
-          setVendor(mockVendor)
-          console.log('✅ Mock vendor data loaded:', mockVendor)
+
+        // Try to load reviews (optional — don't crash if fails)
+        try {
+          const reviewsResponse = await providersAPI.getReviews(id)
+          if (reviewsResponse.success) {
+            setReviews(reviewsResponse.data)
+            console.log('Reviews loaded:', reviewsResponse.data?.length)
+          }
+        } catch {
+          console.log('Reviews not available yet')
+          setReviews([])
         }
-      } catch (err) {
-        if (!cancelled) console.error('Error loading vendor:', err)
+
+      } catch (error) {
+        console.error('Failed to load vendor:', error)
+        setError('Failed to load vendor profile')
       } finally {
-        if (!cancelled) setLoading(false)
+        setLoading(false)
       }
     }
-    load()
-    return () => { cancelled = true }
+
+    if (id) {
+      fetchVendorData()
+    } else {
+      setError('No vendor ID provided')
+      setLoading(false)
+    }
   }, [id])
 
   if (loading) {
     return (
-      <section className="page page-vendor-profile">
-        <div className="page-width">
-          <div className="loading-container">
-            <div className="loading-spinner">Loading profile…</div>
-          </div>
-        </div>
-      </section>
+      <div style={{textAlign:'center', padding:'60px'}}>
+        <p>Loading vendor profile...</p>
+      </div>
+    )
+  }
+
+  if (error) {
+    return (
+      <div style={{textAlign:'center', padding:'60px'}}>
+        <p>{error}</p>
+        <button onClick={() => navigate('/vendors')} className="btn btn-primary">
+          Back to Vendors
+        </button>
+      </div>
     )
   }
 
@@ -78,8 +110,24 @@ export function VendorProfile() {
     )
   }
 
-  const name = vendor.businessName || 'Unnamed business'
-  const initials = name.split(/\s+/).map((w) => w[0]).join('').slice(0, 2).toUpperCase()
+  // Handle all data fields safely since they may differ from mock
+  const vendorId = vendor?.id || vendor?._id
+  const vendorName = vendor?.businessName || vendor?.name || 'Unnamed business'
+  const vendorCategory = vendor?.category
+  const vendorRating = Number(vendor?.averageRating || 0).toFixed(1)
+  const vendorReviews = vendor?.totalReviews || 0
+  const vendorDescription = vendor?.description
+  const vendorAddress = vendor?.address
+  const vendorPhone = vendor?.phoneNumber || vendor?.phone
+  const vendorWhatsapp = vendor?.whatsappNumber || vendor?.whatsapp
+  const vendorHours = vendor?.workingHours
+  const vendorImages = vendor?.images || []
+  
+  // Map coordinates
+  const lat = parseFloat(vendor?.latitude || 0)
+  const lng = parseFloat(vendor?.longitude || 0)
+
+  const initials = vendorName.split(/\s+/).map((w) => w[0]).join('').slice(0, 2).toUpperCase()
   const hasMap = typeof vendor.latitude === 'number' && typeof vendor.longitude === 'number'
   const isVendorOwner = currentUser && userRole === 'vendor' && vendor.userId === currentUser.uid
 
@@ -102,7 +150,7 @@ export function VendorProfile() {
         <header className="page-header">
           <Link to="/vendors" className="back-link">← Vendors</Link>
           <div className="page-header-actions">
-            <h1 className="page-title">{name}</h1>
+            <h1 className="page-title">{vendorName}</h1>
             {isVendorOwner && (
               <button onClick={handleEditProfile} className="btn btn-outline btn-sm">
                 Edit Profile
@@ -110,7 +158,7 @@ export function VendorProfile() {
             )}
           </div>
           <p className="page-subtitle">
-            {[vendor.category, vendor.address].filter(Boolean).join(' • ') || 'Vendor details'}
+            {[vendorCategory, vendorAddress].filter(Boolean).join(' • ') || 'Vendor details'}
           </p>
         </header>
 
@@ -118,36 +166,48 @@ export function VendorProfile() {
           <div className="vendor-header">
             <div className="vendor-avatar">{initials}</div>
             <div>
-              <h2 className="vendor-name">{name}</h2>
+              <h2 className="vendor-name">{vendorName}</h2>
               <p className="vendor-meta">
-                {[vendor.category, vendor.address].filter(Boolean).join(' • ')}
+                {[vendorCategory, vendorAddress].filter(Boolean).join(' • ')}
               </p>
+              {vendorRating > 0 && (
+                <div className="vendor-rating">
+                  <span className="rating-stars">
+                    {'★'.repeat(Math.floor(vendorRating))}
+                    {'☆'.repeat(5 - Math.floor(vendorRating))}
+                  </span>
+                  <span className="rating-number">{vendorRating}</span>
+                  {vendorReviews > 0 && (
+                    <span className="rating-count">({vendorReviews} reviews)</span>
+                  )}
+                </div>
+              )}
             </div>
           </div>
 
           <div className="vendor-body">
-            {vendor.description && (
+            {vendorDescription && (
               <>
                 <h3 className="section-subtitle">Overview</h3>
-                <p>{vendor.description}</p>
+                <p>{vendorDescription}</p>
               </>
             )}
 
-            {(vendor.phone || vendor.whatsapp) && (
+            {(vendorPhone || vendorWhatsapp) && (
               <>
                 <h3 className="section-subtitle">Contact</h3>
                 <div className="contact-actions">
-                  {vendor.phone && (
+                  {vendorPhone && (
                     <button 
-                      onClick={() => handleCallClick(vendor.phone)}
+                      onClick={() => handleCallClick(vendorPhone)}
                       className="btn btn-primary contact-btn"
                     >
-                      📞 Call {vendor.phone}
+                      📞 Call {vendorPhone}
                     </button>
                   )}
-                  {vendor.whatsapp && (
+                  {vendorWhatsapp && (
                     <button 
-                      onClick={() => handleWhatsAppClick(vendor.whatsapp)}
+                      onClick={() => handleWhatsAppClick(vendorWhatsapp)}
                       className="btn btn-success contact-btn"
                     >
                       💬 WhatsApp
@@ -155,20 +215,80 @@ export function VendorProfile() {
                   )}
                 </div>
                 <ul className="simple-list">
-                  {vendor.phone && <li>Phone: {vendor.phone}</li>}
-                  {vendor.whatsapp && <li>WhatsApp: {vendor.whatsapp}</li>}
+                  {vendorPhone && <li>Phone: {vendorPhone}</li>}
+                  {vendorWhatsapp && <li>WhatsApp: {vendorWhatsapp}</li>}
                 </ul>
               </>
             )}
 
-            {hasMap && (
+            {vendorAddress && (
               <>
                 <h3 className="section-subtitle">Location</h3>
-                <VendorMap
-                  latitude={vendor.latitude}
-                  longitude={vendor.longitude}
-                  title={name}
-                />
+                <p>{vendorAddress}</p>
+                
+                {/* Google Maps or OpenStreetMap Location */}
+                <div style={{ 
+                  width: '100%', 
+                  height: '250px', 
+                  borderRadius: '12px', 
+                  overflow: 'hidden',
+                  marginTop: '12px'
+                }}>
+                  {lat && lng ? (
+                    // OpenStreetMap with coordinates (no API key needed)
+                    <iframe
+                      width="100%"
+                      height="250"
+                      style={{ border: 0, borderRadius: '12px', marginTop: '12px' }}
+                      loading="lazy"
+                      src={`https://www.openstreetmap.org/export/embed.html?bbox=${(lng - 0.01).toFixed(6)},${(lat - 0.01).toFixed(6)},${(lng + 0.01).toFixed(6)},${(lat + 0.01).toFixed(6)}&layer=mapnik&marker=${lat.toFixed(6)},${lng.toFixed(6)}`}
+                    />
+                  ) : vendorAddress ? (
+                    <iframe
+                      width="100%"
+                      height="250"
+                      style={{ border: 0, borderRadius: '12px', marginTop: '12px' }}
+                      loading="lazy"
+                      src={`https://www.openstreetmap.org/export/embed.html?bbox=3.0,6.0,4.0,7.0&layer=mapnik&marker=${encodeURIComponent(vendorAddress)}`}
+                    />
+                  ) : null}
+                </div>
+                
+                {/* Open in Google Maps button */}
+                <a
+                  href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(vendorAddress)}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  style={{
+                    display: 'inline-block',
+                    marginTop: '8px',
+                    color: '#f59e0b',
+                    textDecoration: 'none',
+                    fontWeight: '500'
+                  }}
+                >
+                  📍 Open in Google Maps →
+                </a>
+              </>
+            )}
+
+            {reviews.length > 0 && (
+              <>
+                <h3 className="section-subtitle">Reviews ({reviews.length})</h3>
+                <div className="reviews-list">
+                  {reviews.map(review => (
+                    <div key={review.id} className="review-card">
+                      <div className="review-header">
+                        <span className="review-author">{review.author}</span>
+                        <span className="review-rating">
+                          {'★'.repeat(review.rating)}
+                          {'☆'.repeat(5 - review.rating)}
+                        </span>
+                      </div>
+                      <p className="review-text">{review.comment}</p>
+                    </div>
+                  ))}
+                </div>
               </>
             )}
           </div>

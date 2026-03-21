@@ -69,27 +69,27 @@ export function VendorPasswordStep() {
     }
 
     // Prepare form data for backend
-    const completeVendorData = {
-      ...vendorData,
-      password: formData.password,
-      businessName: vendorData.businessName || vendorData.fullName,
+    const completeData = {
+      name: vendorData.fullName || vendorData.name,
+      businessName: vendorData.businessName,
       email: vendorData.email,
-      phone: vendorData.phone,
       category: vendorData.category,
       description: vendorData.description,
-      address: vendorData.address || vendorData.location,
+      phone: vendorData.phone,
+      whatsapp: vendorData.whatsapp,
+      address: vendorData.address,
       workingHours: vendorData.workingHours,
-      whatsapp: vendorData.whatsapp || vendorData.phone,
+      password: formData.password,
     }
 
-    console.log('🚀 Form data being sent:', completeVendorData)
+    console.log('🚀 Form data being sent:', completeData)
     
     setLoading(true)
     setErrors({})
 
     try {
       console.log('📤 Calling backend API...')
-      const response = await authAPI.registerProvider(completeVendorData)
+      const response = await authAPI.registerProvider(completeData)
       console.log('✅ Backend response:', response)
 
       // Show success message

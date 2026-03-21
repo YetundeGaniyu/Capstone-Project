@@ -154,14 +154,15 @@ export function VendorForm() {
       
       // Save form data to localStorage for next step
       const vendorData = {
-        fullName: formValues.fullName.trim(),
-        businessName: formValues.businessName.trim(),
-        email: formValues.email.trim(),
+        name: formValues.fullName,        // add this
+        fullName: formValues.fullName,    // keep this as backup
+        businessName: formValues.businessName,
+        email: formValues.email,
         category: formValues.category,
-        description: formValues.description.trim(),
-        phone: formValues.phone.trim(),
-        whatsapp: formValues.whatsapp.trim(),
-        address: formValues.address.trim(),
+        description: formValues.description,
+        phone: formValues.phone,
+        whatsapp: formValues.whatsapp,
+        address: formValues.address,
         workingHours: formValues.workingHours,
       }
 

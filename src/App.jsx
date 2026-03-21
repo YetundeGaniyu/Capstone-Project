@@ -21,6 +21,7 @@ import { VendorForm } from './components/VendorForm.jsx'
 import { VendorList } from './components/VendorList.jsx'
 import { VendorOnboarding } from './pages/VendorOnboarding.jsx'
 import { VendorOTPVerification } from './pages/VendorOTPVerification.jsx'
+import { EmailVerification } from './pages/EmailVerification.jsx'
 import './styles/global.css'
 
 function App() {
@@ -73,6 +74,7 @@ function App() {
               }
             />
             <Route path="/verify/vendor" element={<VendorOTPVerification />} />
+            <Route path="/verify-email" element={<EmailVerification />} />
             <Route path="/vendors" element={<VendorList />} />
             <Route path="/vendors/:id" element={<VendorProfile />} />
           </Routes>

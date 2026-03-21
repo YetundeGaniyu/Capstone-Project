@@ -1,29 +1,43 @@
 import { useState, useEffect } from 'react'
 import { providersAPI } from '../services/apiService'
+import { VendorCard } from './VendorCard'
 
 export function TopVendors() {
-  const [vendors, setVendors] = useState([])
+  const [topProviders, setTopProviders] = useState([])
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    const fetchTopVendors = async () => {
+    const fetchTopProviders = async () => {
       try {
         const response = await providersAPI.getAll()
+        
+        // Filter and sort for top rated:
+        // - Must have at least 1 review OR have rating >= 4
+        // - Sort by highest rating first
+        // - Show only top 6 on homepage
         const allVendors = response.data || []
-        const topVendors = allVendors
-          .filter(vendor => vendor.rating && vendor.rating > 0)
-          .sort((a, b) => b.rating - a.rating)
+        const validProviders = allVendors.filter(provider => provider && (provider.id || provider._id))
+        
+        // Try to find top rated providers first
+        const topRated = validProviders
+          .filter(provider => (provider.totalReviews > 0 || Number(provider.averageRating || 0) >= 4))
+          .sort((a, b) => Number(b.averageRating || 0) - Number(a.averageRating || 0))
           .slice(0, 6)
         
-        setVendors(topVendors)
+        // If no providers meet the top criteria, just show first 6 valid ones sorted by rating
+        const fallbackProviders = validProviders
+          .sort((a, b) => Number(b.averageRating || 0) - Number(a.averageRating || 0))
+          .slice(0, 6)
+        
+        setTopProviders(topRated.length > 0 ? topRated : fallbackProviders)
+        
       } catch (error) {
-        console.error('Error fetching top vendors:', error)
+        console.error('Failed to load top providers:', error)
       } finally {
         setLoading(false)
       }
     }
-
-    fetchTopVendors()
+    fetchTopProviders()
   }, [])
 
   if (loading) {
@@ -43,7 +57,7 @@ export function TopVendors() {
     )
   }
 
-  if (vendors.length === 0) {
+  if (topProviders.length === 0) {
     return (
       <section className="section">
         <h2 className="section-title">Top Rated Vendors</h2>
@@ -55,37 +69,11 @@ export function TopVendors() {
   return (
     <section className="section">
       <h2 className="section-title">Top Rated Vendors</h2>
-      <div className="vendor-grid">
-        {vendors.map((vendor) => (
-          <a 
-            key={vendor.id} 
-            href={`/vendors/${vendor.id}`}
-            className="vendor-card-link"
-          >
-            <div className="vendor-card">
-              <div className="vendor-card-header">
-                <h3 className="vendor-name">{vendor.businessName}</h3>
-                <div className="vendor-rating">
-                  <span className="rating-stars">
-                    {'★'.repeat(Math.floor(vendor.rating))}
-                    {'☆'.repeat(5 - Math.floor(vendor.rating))}
-                  </span>
-                  <span className="rating-number">{vendor.rating.toFixed(1)}</span>
-                </div>
-              </div>
-              <div className="vendor-location">
-                📍 {vendor.address || 'Location not specified'}
-              </div>
-              <div className="vendor-category">
-                {vendor.category || 'General Services'}
-              </div>
-              {vendor.description && (
-                <div className="vendor-description">
-                  {vendor.description.substring(0, 100)}...
-                </div>
-              )}
-            </div>
-          </a>
+      <div className="top-vendors-grid">
+        {topProviders
+          .filter(provider => provider && (provider.id || provider._id))
+          .map((provider) => (
+          <VendorCard key={provider.id || provider._id} provider={provider} />
         ))}
       </div>
       <div className="section-footer">

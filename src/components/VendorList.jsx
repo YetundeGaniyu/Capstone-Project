@@ -1,145 +1,102 @@
 import { useState, useEffect } from 'react'
-import { providersAPI } from '../services/apiService'
+import { providersAPI, searchAPI } from '../services/apiService'
 import { FilterBar } from './FilterBar.jsx'
 import { VendorCard } from './VendorCard.jsx'
 
-// Weights for ranking: rating 50%, keyword match 30%, recency 20%
-const RATING_WEIGHT = 0.5
-const KEYWORD_MATCH_WEIGHT = 0.3
-const RECENCY_WEIGHT = 0.2
-
-/** Rating: use vendor.ratingAverage (0–1 or 0–5 scale) if present, else neutral 0.5 */
-function getRatingScore(vendor) {
-  const r = vendor.ratingAverage
-  if (typeof r !== 'number' || r < 0) return 0.5
-  if (r <= 1) return r
-  if (r <= 5) return r / 5
-  return 0.5
-}
-
-/** Keyword match: 0–1 from name/description/address (weighted). No keyword => 1. */
-function getKeywordMatchScore(vendor, keyword) {
-  const k = keyword.trim().toLowerCase()
-  if (!k) return 1
-  const name = (vendor.businessName || '').toLowerCase()
-  const desc = (vendor.description || '').toLowerCase()
-  const addr = (vendor.address || '').toLowerCase()
-  let score = 0
-  if (name.includes(k)) score += 0.5
-  if (desc.includes(k)) score += 0.3
-  if (addr.includes(k)) score += 0.2
-  return Math.min(1, score)
-}
-
-/** Recency: 1 for recent, decay over 180 days from updatedAt */
-function getRecencyScore(vendor) {
-  const raw = vendor.updatedAt
-  if (!raw) return 0.5
-  const updated = new Date(raw).getTime()
-  const now = Date.now()
-  const maxAgeMs = 180 * 24 * 60 * 60 * 1000
-  const age = now - updated
-  if (age <= 0) return 1
-  return Math.max(0, 1 - age / maxAgeMs)
-}
-
-/** Combined ranking score (0–1). Higher = better. */
-function getRankingScore(vendor, keyword) {
-  const ratingAverage = getRatingScore(vendor)
-  const keywordMatchScore = getKeywordMatchScore(vendor, keyword)
-  const recencyScore = getRecencyScore(vendor)
-  return (
-    RATING_WEIGHT * ratingAverage +
-    KEYWORD_MATCH_WEIGHT * keywordMatchScore +
-    RECENCY_WEIGHT * recencyScore
-  )
-}
-
-/** Sort vendors by ranking score descending */
-function rankVendors(vendors, keyword) {
-  return [...vendors].sort((a, b) => {
-    const scoreA = getRankingScore(a, keyword)
-    const scoreB = getRankingScore(b, keyword)
-    return scoreB - scoreA
-  })
-}
-
-function filterVendors(vendors, category, keyword) {
-  let list = [...vendors]
-  if (category) {
-    list = list.filter((v) => v.category === category)
-  }
-  if (keyword.trim()) {
-    const k = keyword.trim().toLowerCase()
-    list = list.filter((v) => {
-      const name = (v.businessName || '').toLowerCase()
-      const desc = (v.description || '').toLowerCase()
-      const addr = (v.address || '').toLowerCase()
-      return name.includes(k) || desc.includes(k) || addr.includes(k)
-    })
-  }
-  return list
-}
-
 export function VendorList() {
-  const [vendors, setVendors] = useState([])
+  const [allProviders, setAllProviders] = useState([])
+  const [filteredProviders, setFilteredProviders] = useState([])
+  const [searchTerm, setSearchTerm] = useState('')
+  const [selectedCategory, setSelectedCategory] = useState('All categories')
+  const [categories, setCategories] = useState([])
   const [loading, setLoading] = useState(true)
-  const [searchLoading, setSearchLoading] = useState(false)
-  const [category, setCategory] = useState('')
-  const [keyword, setKeyword] = useState('')
-  const [searchTimeout, setSearchTimeout] = useState(null)
+  const [hasSearched, setHasSearched] = useState(false)
 
+  // Load all providers once
   useEffect(() => {
-    let cancelled = false
-    async function load() {
+    const loadAll = async () => {
       try {
         const response = await providersAPI.getAll()
-        if (cancelled) return
-        const list = (response.data || [])
-          .filter((v) => !v.blacklisted)
-        setVendors(list)
-      } catch (err) {
-        if (!cancelled) console.error('Error loading vendors:', err)
+        const data = response.data.filter(p => p && (p.id || p._id))
+        setAllProviders(data)
+        setFilteredProviders(data)  // show all by default
+        console.log('📥 Loaded all providers:', data.length)
+      } catch (error) {
+        console.error('Failed to load providers:', error)
       } finally {
-        if (!cancelled) setLoading(false)
+        setLoading(false)
       }
     }
-    load()
-    return () => { cancelled = true }
+    loadAll()
   }, [])
 
-  const filtered = filterVendors(vendors, category, keyword)
-  const ranked = rankVendors(filtered, keyword)
+  // Load categories for dropdown
+  useEffect(() => {
+    const loadCategories = async () => {
+      try {
+        const response = await searchAPI.getCategories()
+        setCategories(response.data || [])
+        console.log('📂 Loaded categories:', response.data)
+      } catch (error) {
+        console.error('Failed to load categories:', error)
+        // Fallback categories
+        setCategories([
+          { id: 1, name: 'Cleaning' },
+          { id: 2, name: 'Catering' },
+          { id: 3, name: 'Plumbing' },
+          { id: 4, name: 'Electrical' },
+          { id: 5, name: 'Beauty' },
+          { id: 6, name: 'Transport' },
+          { id: 7, name: 'Security' },
+          { id: 8, name: 'Photography' },
+          { id: 9, name: 'Events' },
+          { id: 10, name: 'Other' }
+        ])
+      }
+    }
+    loadCategories()
+  }, [])
 
-  // Handle keyword change with debouncing
+  // Filter locally whenever search term or category changes
+  useEffect(() => {
+    let results = [...allProviders]
+
+    // Filter by search term (2+ characters)
+    if (searchTerm.length >= 2) {
+      const term = searchTerm.toLowerCase()
+      results = results.filter(p =>
+        p.businessName?.toLowerCase().includes(term) ||
+        p.name?.toLowerCase().includes(term) ||
+        p.category?.toLowerCase().includes(term) ||
+        p.description?.toLowerCase().includes(term) ||
+        p.address?.toLowerCase().includes(term)
+      )
+      console.log(`🔍 Filtered by "${searchTerm}": ${results.length} results`)
+    }
+
+    // Filter by category
+    if (selectedCategory && selectedCategory !== 'All categories') {
+      results = results.filter(p =>
+        p.category?.toLowerCase() === selectedCategory.toLowerCase()
+      )
+      console.log(`🏷️ Filtered by category "${selectedCategory}": ${results.length} results`)
+    }
+
+    setFilteredProviders(results)
+  }, [searchTerm, selectedCategory, allProviders])
+
+  // Handle keyword change
   const handleKeywordChange = (newKeyword) => {
-    setKeyword(newKeyword)
-    
-    // Clear existing timeout
-    if (searchTimeout) {
-      clearTimeout(searchTimeout)
-    }
-
-    // Show loading state for search
-    if (newKeyword.trim()) {
-      setSearchLoading(true)
-    }
-
-    // Set new timeout for search
-    const timeout = setTimeout(() => {
-      setSearchLoading(false)
-    }, 500)
-
-    setSearchTimeout(timeout)
+    setSearchTerm(newKeyword)
+    if (newKeyword.length >= 2) setHasSearched(true)
+    if (newKeyword.length === 0) setHasSearched(false)
   }
 
   // Handle category change
   const handleCategoryChange = (newCategory) => {
-    setCategory(newCategory)
-    if (newCategory) {
-      setSearchLoading(true)
-      setTimeout(() => setSearchLoading(false), 300)
-    }
+    setSelectedCategory(newCategory)
+    if (newCategory !== 'All categories') setHasSearched(true)
+    else if (searchTerm.length < 2) setHasSearched(false)
   }
 
   return (
@@ -153,28 +110,32 @@ export function VendorList() {
         </header>
 
         <FilterBar
-          category={category}
+          category={selectedCategory}
           onCategoryChange={handleCategoryChange}
-          keyword={keyword}
+          keyword={searchTerm}
           onKeywordChange={handleKeywordChange}
         />
 
-        {loading ? (
+        {!hasSearched ? (
+          <p style={{ textAlign: 'center', color: '#888', marginTop: '40px' }}>
+            🔍 Start typing to search for vendors by name, 
+            service type, or location
+          </p>
+        ) : loading ? (
           <div className="loading-container">
-            <div className="loading-spinner">Loading vendors…</div>
+            <div className="loading-spinner">Searching...</div>
           </div>
-        ) : searchLoading ? (
-          <div className="loading-container">
-            <div className="loading-spinner">Loading vendors...</div>
-          </div>
-        ) : ranked.length === 0 ? (
+        ) : filteredProviders.length === 0 ? (
           <div className="vendor-list-empty">
-            <p>No vendors match your filters.</p>
+            <p>No vendors found{searchTerm ? ` for "${searchTerm}"` : ''}. Try a different search.</p>
           </div>
         ) : (
-          <div className="vendor-list-grid">
-            {ranked.map((vendor) => (
-              <VendorCard key={vendor.id} vendor={vendor} />
+          <div className="vendor-list-grid" style={{ width: '100%', margin: '0 auto' }}>
+            {filteredProviders.map(provider => (
+              <VendorCard
+                key={provider.id || provider._id}
+                provider={provider}
+              />
             ))}
           </div>
         )}

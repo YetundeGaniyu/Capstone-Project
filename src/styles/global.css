@@ -2940,8 +2940,23 @@ input {
   gap: var(--space-md);
 }
 
+.top-vendors-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+  /* Remove max-width and margin to inherit from parent section */
+  padding: 0;
+}
+
+@media (max-width: 640px) {
+  .top-vendors-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
 .vendor-list-card {
   display: block;
+  width: 100%;
   padding: var(--space-md);
   border-radius: var(--radius-md);
   background: var(--color-surface);
