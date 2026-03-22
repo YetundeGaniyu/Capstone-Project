@@ -52,7 +52,14 @@ export function VendorLogin() {
         )
         localStorage.setItem('isVendor', 'true')
         localStorage.setItem('vendorBusinessName', businessName)
-        localStorage.setItem('vendorData', JSON.stringify(response.data || response))
+        localStorage.setItem('vendorData', JSON.stringify({
+          id: response.data.id,
+          email: response.data.email,
+          name: response.data.name,
+          businessName: response.data.businessName,
+          role: response.data.role,
+          ...response.data
+        }))
         
         console.log('Full login response data:', response.data)
         

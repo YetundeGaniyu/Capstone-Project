@@ -67,14 +67,7 @@ function App() {
               }
             />
             <Route path="/vendor/verify-otp" element={<VendorOTPVerification />} />
-            <Route
-              path="/vendor/profile"
-              element={
-                <ProtectedRoute requireRole="vendor">
-                  <VendorProfilePage />
-                </ProtectedRoute>
-              }
-            />
+            <Route path="/vendor/profile" element={<VendorProfilePage />} />
             <Route path="/verify/vendor" element={<VendorOTPVerification />} />
             <Route path="/verify-email" element={<EmailVerification />} />
             <Route path="/vendors" element={<VendorList />} />
