@@ -20,7 +20,8 @@ import { VendorPasswordStep } from './components/VendorPasswordStep.jsx'
 import { VendorForm } from './components/VendorForm.jsx'
 import { VendorList } from './components/VendorList.jsx'
 import { VendorOnboarding } from './pages/VendorOnboarding.jsx'
-import { VendorOTPVerification } from './pages/VendorOTPVerification.jsx'
+import VendorOTPVerification from './pages/VendorOtpVerification.jsx'
+import VendorProfilePage from './pages/VendorProfilePage.jsx'
 import { EmailVerification } from './pages/EmailVerification.jsx'
 import './styles/global.css'
 
@@ -65,11 +66,12 @@ function App() {
                 </ProtectedRoute>
               }
             />
+            <Route path="/vendor/verify-otp" element={<VendorOTPVerification />} />
             <Route
               path="/vendor/profile"
               element={
                 <ProtectedRoute requireRole="vendor">
-                  <VendorForm />
+                  <VendorProfilePage />
                 </ProtectedRoute>
               }
             />

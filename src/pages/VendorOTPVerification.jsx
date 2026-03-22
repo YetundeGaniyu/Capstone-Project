@@ -1,238 +1,123 @@
-import { useState, useEffect } from 'react'
-import { useNavigate, useSearchParams } from 'react-router-dom'
+import { useState } from 'react'
+import { useNavigate, useLocation } from 'react-router-dom'
 import { authAPI } from '../services/apiService'
 
-export function VendorOTPVerification() {
+const VendorOtpVerification = () => {
   const [otp, setOtp] = useState('')
-  const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
-  const [vendorData, setVendorData] = useState(null)
-  const [searchParams] = useSearchParams()
+  const [loading, setLoading] = useState(false)
   const navigate = useNavigate()
-  
-  const vendorId = searchParams.get('vendorId')
+  const location = useLocation()
+  const businessName = location.state?.businessName || 
+                       localStorage.getItem('vendorBusinessName')
 
-  useEffect(() => {
-    if (!vendorId) {
-      setError('Invalid verification link')
-      return
-    }
-
-    const fetchVendorData = async () => {
-      try {
-        console.log('🔍 Fetching vendor data for ID:', vendorId)
-        
-        // Mock vendor data for now - in production, this would call an API
-        // const response = await authAPI.getVendorById(vendorId)
-        
-        // For now, simulate vendor data from sessionStorage or mock
-        const mockVendorData = {
-          vendorId: vendorId,
-          businessName: 'Test Business',
-          email: 'test@example.com',
-          otp: '123456',
-          otpExpiration: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
-          verificationLinkExpiration: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
-          emailVerified: false,
-          otpVerified: false,
-          status: 'pending_verification'
-        }
-        
-        setVendorData(mockVendorData)
-        console.log('✅ Mock vendor data loaded:', mockVendorData)
-        
-      } catch (error) {
-        console.error('Error fetching vendor data:', error)
-        setError('Failed to load vendor data')
-      }
-    }
-
-    fetchVendorData()
-  }, [vendorId, navigate])
-
-  const handleSubmit = async (e) => {
+  const handleVerifyOtp = async (e) => {
     e.preventDefault()
-    
-    if (!otp.trim()) {
-      setError('Please enter the OTP')
-      return
-    }
-
-    if (!vendorData) {
-      setError('Vendor data not loaded')
-      return
-    }
-
     setLoading(true)
     setError('')
-
+    
     try {
-      console.log('🔐 Verifying OTP:', otp)
+      console.log('=== OTP VERIFICATION ===')
+      console.log('OTP entered:', otp)
+      console.log('Business name:', businessName)
       
-      // Check if OTP has expired
-      const expirationTime = new Date(vendorData.otpExpiration)
-      if (new Date() > expirationTime) {
-        setError('OTP has expired. Please request a new one.')
-        return
-      }
-
-      // Verify OTP
-      if (otp !== vendorData.otp) {
-        setError('Invalid OTP. Please try again.')
-        return
-      }
-
-      console.log('✅ OTP verification successful')
-      
-      // In production, this would call an API to update the vendor status
-      // await authAPI.verifyVendor(vendorId, { otpVerified: true, status: 'active' })
-      
-      // For now, just show success and redirect
-      setVendorData(prev => ({
-        ...prev,
-        emailVerified: true,
-        otpVerified: true,
-        status: 'active'
-      }))
-
-      // Redirect to vendor login with success message
-      navigate('/login/vendor', { 
-        state: { 
-          message: 'Account verified successfully! You can now login.' 
-        } 
+      const response = await authAPI.verifyOTP({ 
+        otp, 
+        businessName 
       })
       
+      console.log('OTP response:', response)
+      
+      if (response.success) {
+        console.log('OTP verified! Navigating to /vendor/profile')
+        localStorage.setItem('otpVerified', 'true')
+        // Save updated vendor data if returned
+        if (response.data) {
+          localStorage.setItem('vendorData', JSON.stringify(response.data))
+        }
+        navigate('/vendor/profile')
+      } else {
+        console.log('OTP failed:', response.message)
+        setError(response.message || 'Invalid OTP. Please try again.')
+      }
     } catch (error) {
-      console.error('Error verifying OTP:', error)
-      setError('Verification failed. Please try again.')
+      console.error('OTP error:', error)
+      setError(error.message || 'OTP verification failed')
     } finally {
       setLoading(false)
     }
-  }
-
-  const handleResendOTP = async () => {
-    if (!vendorData) return
-
-    setLoading(true)
-    setError('')
-
-    try {
-      console.log('🔄 Resending OTP for vendor:', vendorData.vendorId)
-      
-      // Generate new OTP and expiration
-      const newOTP = Math.floor(100000 + Math.random() * 900000).toString()
-      const newExpiration = new Date(Date.now() + 24 * 60 * 60 * 1000) // 24 hours
-
-      console.log('📧 New OTP generated:', newOTP)
-
-      // In production, this would call an API to update the vendor with new OTP
-      // await authAPI.resendVendorOTP(vendorId, { otp: newOTP, otpExpiration: newExpiration })
-      
-      // For now, just update local state and log
-      setVendorData(prev => ({
-        ...prev,
-        otp: newOTP,
-        otpExpiration: newExpiration.toISOString(),
-        verificationLinkExpiration: newExpiration.toISOString()
-      }))
-
-      // Send new OTP via email (in production, this would send an actual email)
-      console.log('📧 New OTP would be sent to:', vendorData.email)
-      console.log('🔢 New OTP:', newOTP)
-
-      setError('New OTP sent to your email')
-      
-    } catch (error) {
-      console.error('Error resending OTP:', error)
-      setError('Failed to resend OTP. Please try again.')
-    } finally {
-      setLoading(false)
-    }
-  }
-
-  if (error && error.includes('expired') && !vendorData) {
-    return (
-      <section className="page page-otp-verification">
-        <div className="page-width">
-          <div className="card auth-card">
-            <h1 className="page-title">Verification Failed</h1>
-            <p className="page-subtitle">
-              {error}
-            </p>
-            <button 
-              onClick={() => navigate('/vendor/create')}
-              className="btn btn-primary btn-block"
-            >
-              Register Again
-            </button>
-          </div>
-        </div>
-      </section>
-    )
   }
 
   return (
-    <section className="page page-otp-verification">
-      <div className="page-width">
-        <div className="card auth-card">
-          <h1 className="page-title">Verify Your Account</h1>
-          <p className="page-subtitle">
-            Enter the 6-digit OTP sent to your email to complete verification
-          </p>
-
-          {error && <div className="error-message">{error}</div>}
-
-          {vendorData && (
-            <div className="vendor-info">
-              <p><strong>Business:</strong> {vendorData.businessName}</p>
-              <p><strong>Email:</strong> {vendorData.email}</p>
-            </div>
-          )}
-
-          <form className="form" onSubmit={handleSubmit}>
-            <label className="field">
-              <span className="field-label">Enter OTP</span>
-              <input
-                className="field-input"
-                type="text"
-                value={otp}
-                onChange={(e) => setOtp(e.target.value.replace(/\D/g, '').slice(0, 6))}
-                placeholder="123456"
-                maxLength={6}
-                pattern="[0-9]{6}"
-                required
-              />
+    <div style={{
+      minHeight: '100vh',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      backgroundImage: 'url(/afro-img.png)',
+      backgroundSize: 'cover',
+      backgroundPosition: 'center',
+    }}>
+      <div style={{
+        background: 'white',
+        padding: '40px',
+        borderRadius: '16px',
+        width: '100%',
+        maxWidth: '420px',
+        boxShadow: '0 4px 24px rgba(0,0,0,0.1)'
+      }}>
+        <h2 style={{ textAlign: 'center', marginBottom: '8px' }}>
+          Enter OTP
+        </h2>
+        <p style={{ textAlign: 'center', color: '#6b7280', marginBottom: '24px' }}>
+          Enter OTP sent to your email alongside your confirmation link
+        </p>
+        {error && (
+          <div style={{
+            background: '#fee2e2', color: '#dc2626',
+            padding: '12px', borderRadius: '8px', marginBottom: '16px'
+          }}>
+            {error}
+          </div>
+        )}
+        <form onSubmit={handleVerifyOtp}>
+          <div style={{ marginBottom: '20px' }}>
+            <label style={{ display: 'block', marginBottom: '6px', fontWeight: '500' }}>
+              OTP Code
             </label>
-
-            <button
-              type="submit"
-              disabled={loading || !vendorData}
-              className="btn btn-primary btn-block"
-            >
-              {loading ? 'Verifying...' : 'Verify Account'}
-            </button>
-
-            <div className="otp-actions">
-              <button
-                type="button"
-                onClick={handleResendOTP}
-                disabled={loading || !vendorData}
-                className="btn btn-ghost btn-sm"
-              >
-                Resend OTP
-              </button>
-              
-              <button
-                type="button"
-                onClick={() => navigate('/login/vendor')}
-                className="btn btn-ghost btn-sm"
-              >
-                Back to Login
-              </button>
-            </div>
-          </form>
-        </div>
+            <input
+              type="text"
+              value={otp}
+              onChange={(e) => setOtp(e.target.value)}
+              placeholder="Enter OTP"
+              maxLength={6}
+              style={{
+                width: '100%', padding: '12px',
+                borderRadius: '8px', border: '1px solid #e5e7eb',
+                fontSize: '20px', textAlign: 'center', letterSpacing: '6px'
+              }}
+              required
+            />
+          </div>
+          <button type="submit" disabled={loading} style={{
+            width: '100%', padding: '12px',
+            borderRadius: '8px', background: '#f59e0b',
+            color: 'white', border: 'none',
+            fontWeight: '600', cursor: 'pointer', fontSize: '16px'
+          }}>
+            {loading ? 'Verifying...' : 'Verify OTP'}
+          </button>
+        </form>
+        <p style={{ textAlign: 'center', marginTop: '16px', color: '#6b7280' }}>
+          Didn't receive OTP?{' '}
+          <span onClick={() => navigate('/vendor/login')}
+            style={{ color: '#f59e0b', cursor: 'pointer' }}>
+            Go back to login
+          </span>
+        </p>
       </div>
-    </section>
+    </div>
   )
 }
+
+export default VendorOtpVerification

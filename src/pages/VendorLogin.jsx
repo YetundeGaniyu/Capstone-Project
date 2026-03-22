@@ -51,10 +51,9 @@ export function VendorLogin() {
           response.token || response.data?.token
         )
         localStorage.setItem('isVendor', 'true')
-        localStorage.setItem('vendorData', 
-          JSON.stringify(response.data || {})
-        )
-        navigate('/vendor/dashboard')
+        localStorage.setItem('vendorBusinessName', businessName)
+        localStorage.setItem('vendorData', JSON.stringify(response.data || response))
+        navigate('/vendor/verify-otp', { state: { businessName } })
       } else {
         setError(response.message || 'Login failed')
       }
@@ -113,8 +112,12 @@ export function VendorLogin() {
           </p>
 
           {successMessage && (
-            <div className="success-message">
-              {successMessage}
+            <div style={{
+              background: '#d1fae5', color: '#065f46',
+              padding: '12px', borderRadius: '8px', marginBottom: '16px',
+              textAlign: 'center'
+            }}>
+              ✅ {successMessage}
             </div>
           )}
 
