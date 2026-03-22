@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
+import { authAPI } from '../services/apiService'
 
 export function VendorLogin() {
   const { signInWithGoogle, currentUser } = useAuth();
@@ -24,30 +25,41 @@ export function VendorLogin() {
   }
 
   const handleBusinessLogin = async (e) => {
-    e.preventDefault();
-    if (!credentials.businessName || !credentials.password) {
-      setError("Please enter both business name and password");
-      return;
+    e.preventDefault()
+    console.log('Calling vendor login endpoint...')
+    
+    const { businessName, password } = credentials
+    
+    if (!businessName || !password) {
+      setError('Business name and password are required')
+      return
     }
-
-setLoading(true)
+    
+    setLoading(true)
     setError('')
-
+    
     try {
-      // For now, we'll use a simple validation approach
-      // In a full implementation, this would call authAPI.login()
-      if (credentials.businessName === 'test' && credentials.password === 'test') {
-        // Mock successful login
-        await signInWithGoogle('vendor')
-        navigate('/dashboard')
-        return
-      }
-
-      setError('Invalid business name or password')
+      const response = await authAPI.loginProvider({
+        businessName: businessName.trim(),
+        password: password
+      })
       
-    } catch (err) {
-      console.error('Login error:', err)
-      setError('Login failed. Please try again.')
+      console.log('Vendor login response:', response)
+      
+      if (response.success) {
+        localStorage.setItem('authToken', 
+          response.token || response.data?.token
+        )
+        localStorage.setItem('isVendor', 'true')
+        localStorage.setItem('vendorData', 
+          JSON.stringify(response.data || {})
+        )
+        navigate('/vendor/dashboard')
+      } else {
+        setError(response.message || 'Login failed')
+      }
+    } catch (error) {
+      setError(error.message || 'Login failed. Please try again.')
     } finally {
       setLoading(false)
     }
@@ -121,7 +133,7 @@ setLoading(true)
                   value={credentials.businessName}
                   onChange={handleInputChange}
                   className="form-input"
-                  placeholder="Enter your business name"
+                  placeholder="Enter your registered business name"
                   required
                 />
               </div>

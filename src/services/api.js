@@ -17,6 +17,7 @@ export const API_ENDPOINTS = {
     REGISTER_USER: '/auth/register',
     REGISTER_PROVIDER: '/auth/register-provider',
     LOGIN: '/auth/login',
+    LOGIN_PROVIDER: '/auth/login-provider',
     REFRESH: '/auth/refresh',
     GOOGLE_LOGIN: '/api/v1/auth/google',
     VERIFY_EMAIL: '/auth/verify-email',

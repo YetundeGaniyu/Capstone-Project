@@ -139,6 +139,16 @@ export const authAPI = {
     endpoint: API_ENDPOINTS.AUTH.VERIFY_OTP,
     data: otpData,
   }),
+
+  /**
+   * Provider login
+   * @param {Object} credentials - Provider login credentials
+   */
+  loginProvider: (credentials) => apiRequest({
+    method: HTTP_METHODS.POST,
+    endpoint: API_ENDPOINTS.AUTH.LOGIN_PROVIDER,
+    data: credentials,
+  }),
 }
 
 /**
