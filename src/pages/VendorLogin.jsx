@@ -53,7 +53,23 @@ export function VendorLogin() {
         localStorage.setItem('isVendor', 'true')
         localStorage.setItem('vendorBusinessName', businessName)
         localStorage.setItem('vendorData', JSON.stringify(response.data || response))
-        navigate('/vendor/verify-otp', { state: { businessName } })
+        
+        console.log('Full login response data:', response.data)
+        
+        // Check if vendor needs OTP verification or is already verified
+        const isOtpVerified = response.data?.otpVerified || 
+                              response.data?.isVerified ||
+                              response.otpVerified
+
+        console.log('OTP verified status:', isOtpVerified)
+        
+        if (isOtpVerified) {
+          // Already verified — go straight to profile
+          navigate('/vendor/profile')
+        } else {
+          // Needs OTP verification
+          navigate('/vendor/verify-otp', { state: { businessName } })
+        }
       } else {
         setError(response.message || 'Login failed')
       }
