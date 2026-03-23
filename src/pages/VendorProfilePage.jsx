@@ -13,17 +13,32 @@ const VendorProfilePage = () => {
   const authToken = localStorage.getItem('authToken')
 
   useEffect(() => {
-    const vendorData = JSON.parse(
-      localStorage.getItem('vendorData') || '{}'
-    )
-    if (vendorData && (vendorData.id || vendorData._id)) {
-      setVendor(vendorData)
-      setFormData(vendorData)
-      setLoading(false)
-    } else {
-      navigate('/vendor/login')
-    }
-  }, [])
+  const token = localStorage.getItem('authToken')
+  
+  if (!token) {
+    navigate('/vendor/login')
+    return
+  }
+  
+  const savedVendorData = JSON.parse(
+    localStorage.getItem('vendorData') || '{}'
+  )
+  
+  console.log('Loaded vendor data from localStorage:', savedVendorData)
+  
+  if (savedVendorData && savedVendorData.businessName) {
+    setVendor(savedVendorData)
+    setFormData(savedVendorData)
+  } else {
+    // No data found, redirect to login
+    navigate('/vendor/login')
+  }
+  
+  setLoading(false)
+  
+  // Remove the fetchFullProfile API call entirely for now
+  // until GET /api/v1/providers/:id is fixed by backend
+}, [navigate])
 
   const handleSave = async () => {
     setSaving(true)
@@ -53,13 +68,22 @@ const VendorProfilePage = () => {
   )
 
   const fields = [
-    { label: 'Business Name', field: 'businessName' },
-    { label: 'Category', field: 'category' },
-    { label: 'Description', field: 'description' },
-    { label: 'Phone Number', field: 'phoneNumber' },
-    { label: 'WhatsApp', field: 'whatsappNumber' },
-    { label: 'Address', field: 'address' },
-  ]
+  { label: 'Business Name', field: 'businessName' },
+  { label: 'Category', field: 'category' },
+  { label: 'Description', field: 'description' },
+  { 
+    label: 'Phone Number', 
+    field: 'phoneNumber',
+    altField: 'phone'  // fallback field name
+  },
+  { 
+    label: 'WhatsApp', 
+    field: 'whatsappNumber',
+    altField: 'whatsapp'
+  },
+  { label: 'Address', field: 'address' },
+  { label: 'Email', field: 'email' },
+]
 
   return (
     <div style={{ 
@@ -110,7 +134,7 @@ const VendorProfilePage = () => {
         )}
 
         {/* Profile Fields */}
-        {fields.map(({ label, field }) => (
+        {fields.map(({ label, field, altField }) => (
           <div key={field} style={{ marginBottom: '20px' }}>
             <label style={{ 
               display: 'block', fontWeight: '600', 
@@ -121,7 +145,7 @@ const VendorProfilePage = () => {
             {editing ? (
               <input
                 type="text"
-                value={formData[field] || ''}
+                value={formData[field] || formData[altField] || ''}
                 onChange={(e) => setFormData({
                   ...formData, [field]: e.target.value
                 })}
@@ -136,7 +160,7 @@ const VendorProfilePage = () => {
                 color: '#6b7280', padding: '10px 0', margin: 0,
                 borderBottom: '1px solid #f3f4f6'
               }}>
-                {vendor[field] || 'Not provided'}
+                {vendor[field] || vendor[altField] || 'Not provided'}
               </p>
             )}
           </div>

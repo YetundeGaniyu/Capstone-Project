@@ -46,23 +46,27 @@ export function AdminAccess() {
     
     console.log('Admin login response:', response)
     
-    if (response.success && response.token) {
+    if (response.success) {
+      // Check role from response.data.role (not response.isAdmin)
+      const userRole = response.data?.role
+      const token = response.token || response.data?.token
       
-      if (response.isAdmin === true) {
-        // Store token and admin flag
-        localStorage.setItem('authToken', response.token)
+      console.log('User role:', userRole)
+      console.log('Token:', token ? 'exists' : 'missing')
+      
+      if (userRole === 'admin') {
+        localStorage.setItem('authToken', token)
         localStorage.setItem('isAdmin', 'true')
+        localStorage.setItem('adminData', JSON.stringify(response.data))
         navigate('/admin/dashboard')
       } else {
-        // Valid user but not admin
         setError('Access denied. You do not have admin privileges.')
       }
-      
     } else {
-      setError(response.message || 'Invalid credentials')
+      setError(response.message || 'Login failed')
     }
-    
   } catch (error) {
+    console.error('Admin login error:', error)
     setError(error.message || 'Login failed. Please try again.')
   } finally {
     setLoading(false)
@@ -90,7 +94,7 @@ export function AdminAccess() {
           <div className="admin-access-form">
             {error && <div className="error-message">{error}</div>}
             
-            <form className="form" onSubmit={handleAdminLogin}>
+            <form className="form" onSubmit={handleAdminLogin} autoComplete="off">
               <div className="form-group">
                 <label htmlFor="email" className="form-label">
                   Email
@@ -99,6 +103,7 @@ export function AdminAccess() {
                   type="email"
                   id="email"
                   name="email"
+                  autoComplete="off"
                   value={formValues.email}
                   onChange={handleInputChange}
                   className="form-input"
@@ -115,6 +120,7 @@ export function AdminAccess() {
                   type="password"
                   id="password"
                   name="password"
+                  autoComplete="new-password"
                   value={formValues.password}
                   onChange={handleInputChange}
                   className="form-input"

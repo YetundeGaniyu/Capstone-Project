@@ -47,25 +47,39 @@ export function VendorLogin() {
       console.log('Vendor login response:', response)
       
       if (response.success) {
+        const vendorData = response.data || {}
+        
+        console.log('Saving complete vendor data:', vendorData)
+        
         localStorage.setItem('authToken', 
-          response.token || response.data?.token
+          response.token || vendorData.token
         )
         localStorage.setItem('isVendor', 'true')
-        localStorage.setItem('vendorBusinessName', businessName)
+        localStorage.setItem('vendorBusinessName', 
+          vendorData.businessName || businessName
+        )
+        // Save ALL fields from response
         localStorage.setItem('vendorData', JSON.stringify({
-          id: response.data.id,
-          email: response.data.email,
-          name: response.data.name,
-          businessName: response.data.businessName,
-          role: response.data.role,
-          ...response.data
+          id: vendorData.id,
+          email: vendorData.email,
+          name: vendorData.name,
+          businessName: vendorData.businessName,
+          category: vendorData.category,
+          description: vendorData.description,
+          phoneNumber: vendorData.phoneNumber || vendorData.phone,
+          whatsappNumber: vendorData.whatsappNumber || vendorData.whatsapp,
+          address: vendorData.address,
+          workingHours: vendorData.workingHours,
+          role: vendorData.role,
+          isVerified: vendorData.isVerified,
+          otpVerified: vendorData.otpVerified,
         }))
         
         console.log('Full login response data:', response.data)
         
         // Check if vendor needs OTP verification or is already verified
-        const isOtpVerified = response.data?.otpVerified || 
-                              response.data?.isVerified ||
+        const isOtpVerified = vendorData?.otpVerified || 
+                              vendorData?.isVerified ||
                               response.otpVerified
 
         console.log('OTP verified status:', isOtpVerified)
